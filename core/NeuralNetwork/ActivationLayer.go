@@ -40,3 +40,56 @@ func (sigmoid *Sigmoid) Backward(dout mat.Matrix) mat.Matrix {
 	}
 	return dense
 }
+
+// Relu : Relu関数
+type Relu struct {
+}
+
+// NewRelu : Relu関数の素子を取得
+func NewRelu() *Relu {
+	r := &Relu{}
+	return r
+}
+
+func (r *Relu) Forward(x mat.Matrix) mat.Matrix {
+	return nil
+}
+
+func (r *Relu) Backward(dout mat.Matrix) mat.Matrix {
+	return nil
+}
+
+// Tanh : Tanh関数
+type Tanh struct {
+}
+
+// NewTanh : Tanh関数の素子を取得
+func NewTanh() *Tanh {
+	t := &Tanh{}
+	return t
+}
+
+func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
+	return nil
+}
+
+func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
+	return nil
+}
+
+type Softmax struct {
+}
+
+func NewSoftmax() *Softmax {
+	s := &Softmax{}
+	return s
+}
+
+func (s *Softmax) Forward(x mat.Matrix) mat.Matrix {
+	return nil
+}
+
+func (s *Softmax) Backward(dout mat.Matrix) mat.Matrix {
+	return nil
+}
+

@@ -1,6 +1,6 @@
 package NeuralNetwork
 
-import "github.com/gonum/gonum/mat"
+import "gonum.org/v1/gonum/mat"
 
 // NeuralNetworkLayer : ニューラルネットワークの素子に関するIF
 type NeuralNetworkLayer interface {
