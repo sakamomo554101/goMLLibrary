@@ -43,6 +43,7 @@ func (sigmoid *Sigmoid) Backward(dout mat.Matrix) mat.Matrix {
 
 // Relu : Relu関数
 type Relu struct {
+	out mat.Matrix
 }
 
 // NewRelu : Relu関数の素子を取得
@@ -51,12 +52,31 @@ func NewRelu() *Relu {
 	return r
 }
 
-func (r *Relu) Forward(x mat.Matrix) mat.Matrix {
-	return nil
+func (relu *Relu) Forward(x mat.Matrix) mat.Matrix {
+	r, c := x.Dims()
+	dense := mat.NewDense(r, c, nil) // zero matrix
+	for i := 0; i < r ; i++ {
+		for j := 0; j < c; j++ {
+			if x.At(i, j) > 0 {
+				dense.At(i, j) = x.At(i, j)
+			}
+		}
+	}
+	relu.out = dense
+	return dense
 }
 
-func (r *Relu) Backward(dout mat.Matrix) mat.Matrix {
-	return nil
+func (relu *Relu) Backward(dout mat.Matrix) mat.Matrix {
+	r, c := dout.Dims()
+	dense := mat.NewDense(r, c, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			if relu.out.At(i, j) > 0 {
+				dense.At(i, j) = dout.At(i, j)
+			}
+		}
+	}
+	return dense
 }
 
 // Tanh : Tanh関数
