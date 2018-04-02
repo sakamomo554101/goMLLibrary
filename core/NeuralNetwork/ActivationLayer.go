@@ -81,6 +81,7 @@ func (relu *Relu) Backward(dout mat.Matrix) mat.Matrix {
 
 // Tanh : Tanh関数
 type Tanh struct {
+	out mat.Matrix
 }
 
 // NewTanh : Tanh関数の素子を取得
@@ -90,11 +91,25 @@ func NewTanh() *Tanh {
 }
 
 func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
-	return nil
+	r, c := x.Dims()
+	dense := mat.NewDense(r, c, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			dense.At(i,j) = math.Tanh(x.At(i,j))
+		}
+	}
+	return dense
 }
 
 func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
-	return nil
+	r, c := dout.Dims()
+	dense := mat.NewDense(r, c, nil)
+	for i := 0; i < c; i++ {
+		for j := 0; j < r; j++ {
+			dense.At(i,j) = dout.At(i,j) * (1- math.Pow(tanh.out.At(i,j), 2))
+		}
+	}
+	return dense
 }
 
 type Softmax struct {
