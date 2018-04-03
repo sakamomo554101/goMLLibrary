@@ -98,6 +98,7 @@ func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 			dense.At(i,j) = math.Tanh(x.At(i,j))
 		}
 	}
+	tanh.out = dense
 	return dense
 }
 
