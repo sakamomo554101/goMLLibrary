@@ -58,7 +58,7 @@ func (relu *Relu) Forward(x mat.Matrix) mat.Matrix {
 	for i := 0; i < r ; i++ {
 		for j := 0; j < c; j++ {
 			if x.At(i, j) > 0 {
-				dense.At(i, j) = x.At(i, j)
+				dense.Set(i,j, x.At(i, j))
 			}
 		}
 	}
@@ -72,7 +72,7 @@ func (relu *Relu) Backward(dout mat.Matrix) mat.Matrix {
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
 			if relu.out.At(i, j) > 0 {
-				dense.At(i, j) = dout.At(i, j)
+				dense.Set(i,j, dout.At(i, j))
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			dense.At(i,j) = math.Tanh(x.At(i,j))
+			dense.Set(i, j, math.Tanh(x.At(i,j)))
 		}
 	}
 	tanh.out = dense
@@ -107,7 +107,7 @@ func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	for i := 0; i < c; i++ {
 		for j := 0; j < r; j++ {
-			dense.At(i,j) = dout.At(i,j) * (1- math.Pow(tanh.out.At(i,j), 2))
+			dense.Set(i, j, dout.At(i,j) * (1- math.Pow(tanh.out.At(i,j), 2)))
 		}
 	}
 	return dense
