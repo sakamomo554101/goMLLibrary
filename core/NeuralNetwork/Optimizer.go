@@ -1,6 +1,8 @@
 package NeuralNetwork
 
-import "gonum.org/v1/gonum/mat"
+import (
+	"gonum.org/v1/gonum/mat"
+)
 
 // Optimizer : パラメーターと勾配情報からパラメーターの最適化を行うIF
 type Optimizer interface {
@@ -43,12 +45,12 @@ func WithSGDLearningRate(lr float64) SGDOption {
 
 func (sgd *SGD) Update(params map[string]mat.Matrix, grads map[string]mat.Matrix) {
 	for key, _ := range params {
-		r, c := params[key].Dims()
-		dense := mat.NewDense(r, c, nil)
+		//r, c := params[key].Dims()
+		dense := mat.DenseCopyOf(params[key])
 
 		// 学習率分だけ勾配を拡縮
 		dense.Apply(func(i, j int, v float64) float64 {
-			return dense.At(i, j) * sgd.lr
+			return v * sgd.lr
 		}, grads[key])
 
 		// 重みから勾配分（学習率を考慮）だけ差をとる
