@@ -37,12 +37,9 @@ func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 	_, outputSize := aff.w.Dims()
 	d := mat.NewDense(batchSize, outputSize, nil)
 	d.Mul(aff.x, aff.w)
-	for i := 0; i < batchSize; i++ {
-		for j := 0; j < outputSize; j++ {
-			// TODO : gonumの計算手法でもうちょっと楽にできるかもしれない
-			d.Set(i, j, aff.b.At(0, j))
-		}
-	}
+	d.Apply(func(i, j int, v float64) float64 {
+		return aff.b.At(0, j)
+	}, d)
 	return d
 }
 
