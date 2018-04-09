@@ -44,6 +44,17 @@ func TestAffine(t *testing.T) {
 				expectedDb := mat.NewVecDense(2, []float64{20, 30})
 				So(mat.Equal(aff.db, expectedDb), ShouldBeTrue)
 			})
+
+			Convey("AND : 各値にして修正", nil)
+			params := make(map[string]mat.Matrix)
+			params["w"] = mat.NewDense(3, 2, createFloatArrayByStep(6, 10, 10))
+			params["b"] = mat.NewVecDense(2, []float64{2, 4})
+			Convey("Then : Update処理を行う.", func() {
+				aff.UpdateParams(params)
+				ps := aff.GetParams()
+				So(mat.Equal(ps["w"], params["w"]), ShouldBeTrue)
+				So(mat.Equal(ps["b"], params["b"]), ShouldBeTrue)
+			})
 		})
 	})
 }

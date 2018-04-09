@@ -96,7 +96,7 @@ func (aff *Affine) GetGradients() map[string]mat.Matrix {
 func (aff *Affine) UpdateParams(params map[string]mat.Matrix) {
 	// パラメータのアップデート
 	aff.w = params["w"]
-	aff.b = mat.DenseCopyOf(params["b"]).RowView(0)
+	aff.b = mat.DenseCopyOf(params["b"]).ColView(0)
 
 	// 勾配のリセット
 	aff.dw = nil
