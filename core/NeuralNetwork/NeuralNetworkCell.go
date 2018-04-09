@@ -11,6 +11,12 @@ type NeuralNetworkLayer interface {
 	Forward(x mat.Matrix) mat.Matrix
 	// Backward : 逆方向伝搬の実施
 	Backward(dout mat.Matrix) mat.Matrix
+	// GetParams : 各種パラメーターを取得
+	GetParams() map[string]mat.Matrix
+	// GetGradients : 各種勾配を取得
+	GetGradient() map[string]mat.Matrix
+	// UpdateParams : 各種パラメーターを更新
+	UpdateParams(map[string]mat.Matrix)
 }
 
 type Affine struct {
@@ -31,18 +37,20 @@ func NewAffine(inputSize, outputSize int) *Affine {
 	return &a
 }
 
+func newAffine(w mat.Matrix, b mat.Vector) *Affine {
+	a := Affine{w: w, b: b}
+	return &a
+}
+
 func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 	aff.x = x
 	batchSize, _ := aff.x.Dims()
 	_, outputSize := aff.w.Dims()
 	d := mat.NewDense(batchSize, outputSize, nil)
 	d.Mul(aff.x, aff.w)
-	for i := 0; i < batchSize; i++ {
-		for j := 0; j < outputSize; j++ {
-			// TODO : gonumの計算手法でもうちょっと楽にできるかもしれない
-			d.Set(i, j, aff.b.At(0, j))
-		}
-	}
+	d.Apply(func(i, j int, v float64) float64 {
+		return aff.b.AtVec(j) + v
+	}, d)
 	return d
 }
 
@@ -71,6 +79,26 @@ func (aff *Affine) Backward(dout mat.Matrix) mat.Matrix {
 	return dx
 }
 
-func (aff *Affine) Update(w mat.Matrix, b mat.Matrix) {
-	// TODO 重みの更新処理を記載
+func (aff *Affine) GetParams() map[string]mat.Matrix {
+	params := make(map[string]mat.Matrix)
+	params["w"] = aff.w
+	params["b"] = aff.b
+	return params
+}
+
+func (aff *Affine) GetGradients() map[string]mat.Matrix {
+	grads := make(map[string]mat.Matrix)
+	grads["dw"] = aff.dw
+	grads["db"] = aff.db
+	return grads
+}
+
+func (aff *Affine) UpdateParams(params map[string]mat.Matrix) {
+	// パラメータのアップデート
+	aff.w = params["w"]
+	aff.b = mat.DenseCopyOf(params["b"]).ColView(0)
+
+	// 勾配のリセット
+	aff.dw = nil
+	aff.db = nil
 }
