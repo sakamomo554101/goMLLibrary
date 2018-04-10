@@ -19,12 +19,9 @@ func NewSigmoid() *Sigmoid {
 func (sigmoid *Sigmoid) Forward(x mat.Matrix) mat.Matrix {
 	r, c := x.Dims()
 	dense := mat.NewDense(r, c, nil) // zero dense
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			val := 1.0 / (1.0 + math.Exp(x.At(i, j)))
-			dense.Set(i, j, val)
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return 1.0 / (1.0 + math.Exp(-v))
+	}, x)
 	sigmoid.out = dense
 	return dense
 }
@@ -32,12 +29,9 @@ func (sigmoid *Sigmoid) Forward(x mat.Matrix) mat.Matrix {
 func (sigmoid *Sigmoid) Backward(dout mat.Matrix) mat.Matrix {
 	r, c := dout.Dims()
 	dense := mat.NewDense(r, c, nil) // zero dense
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			val := dout.At(i, j) * (1 - sigmoid.out.At(i, j)) * sigmoid.out.At(i, j)
-			dense.Set(i, j, val)
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return v * (1.0 - sigmoid.out.At(i, j)) * sigmoid.out.At(i, j)
+	}, dout)
 	return dense
 }
 
@@ -55,13 +49,13 @@ func NewRelu() *Relu {
 func (relu *Relu) Forward(x mat.Matrix) mat.Matrix {
 	r, c := x.Dims()
 	dense := mat.NewDense(r, c, nil) // zero matrix
-	for i := 0; i < r ; i++ {
-		for j := 0; j < c; j++ {
-			if x.At(i, j) > 0 {
-				dense.Set(i,j, x.At(i, j))
-			}
+	dense.Apply(func(i, j int, v float64) float64 {
+		if v > 0 {
+			return x.At(i, j)
+		} else {
+			return 0
 		}
-	}
+	}, x)
 	relu.out = dense
 	return dense
 }
@@ -69,13 +63,13 @@ func (relu *Relu) Forward(x mat.Matrix) mat.Matrix {
 func (relu *Relu) Backward(dout mat.Matrix) mat.Matrix {
 	r, c := dout.Dims()
 	dense := mat.NewDense(r, c, nil)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			if relu.out.At(i, j) > 0 {
-				dense.Set(i,j, dout.At(i, j))
-			}
+	dense.Apply(func(i, j int, v float64) float64 {
+		if relu.out.At(i, j) > 0 {
+			return v
+		} else {
+			return 0
 		}
-	}
+	}, dout)
 	return dense
 }
 
@@ -95,7 +89,7 @@ func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			dense.Set(i, j, math.Tanh(x.At(i,j)))
+			dense.Set(i, j, math.Tanh(x.At(i, j)))
 		}
 	}
 	tanh.out = dense
@@ -107,15 +101,15 @@ func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	for i := 0; i < c; i++ {
 		for j := 0; j < r; j++ {
-			dense.Set(i, j, dout.At(i,j) * (1- math.Pow(tanh.out.At(i,j), 2)))
+			dense.Set(i, j, dout.At(i, j)*(1-math.Pow(tanh.out.At(i, j), 2)))
 		}
 	}
 	return dense
 }
 
 type SoftmaxWithLoss struct {
-	out mat.Matrix
-	t mat.Matrix
+	out  mat.Matrix
+	t    mat.Matrix
 	loss float64
 }
 
@@ -136,9 +130,9 @@ func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	bs := r
 
-	for i := 0 ; i < r ; i++ {
+	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			val := (s.out.At(i,j) - s.t.At(i,j)) / float64(bs)
+			val := (s.out.At(i, j) - s.t.At(i, j)) / float64(bs)
 			dense.Set(i, j, val)
 		}
 	}
@@ -163,7 +157,7 @@ func (s *SoftmaxWithLoss) softmax(x mat.Matrix) mat.Matrix {
 
 		// 各列の値を算出
 		for j := 0; j < c; j++ {
-			val := math.Exp(v.At(j, 0) - max) / sum
+			val := math.Exp(v.At(j, 0)-max) / sum
 			dense.Set(i, j, val)
 		}
 	}
@@ -190,10 +184,9 @@ func (s *SoftmaxWithLoss) crossEntropyError(x mat.Matrix, t mat.Matrix) float64 
 	dense := mat.NewDense(xr, xc, nil)
 	for i := 0; i < xr; i++ {
 		for j := 0; j < xc; j++ {
-			val := -1 * t.At(i,j) * math.Log(x.At(i,j) + delta)
-			dense.Set(i , j, val)
+			val := -1 * t.At(i, j) * math.Log(x.At(i, j)+delta)
+			dense.Set(i, j, val)
 		}
 	}
 	return mat.Sum(dense) / float64(bs)
 }
-
