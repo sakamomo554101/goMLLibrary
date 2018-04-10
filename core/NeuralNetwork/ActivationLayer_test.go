@@ -10,13 +10,16 @@ import (
 func TestSigmoid(t *testing.T) {
 	Convey("Given : sigmoidレイヤーが一つ与えられた時", t, func() {
 		s := NewSigmoid()
-		Convey("When : 入力行列x(2*3)が与えられた時", func() {
-			x := mat.NewDense(2, 3, createFloatArrayByStep(6, 1, 1))
+		Convey("AND : 行列サイズを2*3とする", nil)
+		r := 2
+		c := 3
+		Convey("When : 入力行列xが与えられた時", func() {
+			x := mat.NewDense(r, c, createFloatArrayByStep(r*c, 1, 1))
 			out := s.Forward(x)
 			Convey("Then : Forward処理を実施", func() {
-				r, c := out.Dims()
-				So(r, ShouldEqual, 2)
-				So(c, ShouldEqual, 3)
+				act_r, act_c := out.Dims()
+				So(act_r, ShouldEqual, r)
+				So(act_c, ShouldEqual, c)
 				for i := 0; i < r; i++ {
 					for j := 0; j < c; j++ {
 						So(out.At(i, j), ShouldEqual, sigmoid_forward(x.At(i, j)))
@@ -24,16 +27,53 @@ func TestSigmoid(t *testing.T) {
 				}
 			})
 
-			Convey("AND : 誤差dout(2*3)が与えられた時", nil)
-			dout := mat.NewDense(2, 3, createFloatArrayByStep(6, 0.5, 0.5))
+			Convey("AND : 誤差doutが与えられた時", nil)
+			dout := mat.NewDense(r, c, createFloatArrayByStep(r*c, 0.5, 0.5))
 			Convey("Then : Backward処理を実施", func() {
 				out := s.Backward(dout)
-				r, c := out.Dims()
-				So(r, ShouldEqual, 2)
-				So(c, ShouldEqual, 3)
+				act_r, act_c := out.Dims()
+				So(act_r, ShouldEqual, r)
+				So(act_c, ShouldEqual, c)
 				for i := 0; i < r; i++ {
 					for j := 0; j < c; j++ {
 						So(out.At(i, j), ShouldEqual, sigmoid_backward(x.At(i, j), dout.At(i, j)))
+					}
+				}
+			})
+		})
+	})
+}
+
+func TestRelu(t *testing.T) {
+	Convey("Given : Reluレイヤーが一つ与えられた時", t, func() {
+		relu := NewRelu()
+		Convey("AND : 行列サイズを3*2とする", nil)
+		r := 3
+		c := 2
+		Convey("When : 入力行列xが与えられた時", func() {
+			x := mat.NewDense(r, c, createFloatArrayByStep(r*c, 1, 1))
+			out := relu.Forward(x)
+			Convey("Then : Forward処理を実施", func() {
+				act_r, act_c := out.Dims()
+				So(act_r, ShouldEqual, r)
+				So(act_c, ShouldEqual, c)
+				for i := 0; i < r; i++ {
+					for j := 0; j < c; j++ {
+						So(out.At(i, j), ShouldEqual, relu_forward(x.At(i, j)))
+					}
+				}
+			})
+
+			Convey("AND : 誤差doutが与えられた時", nil)
+			dout := mat.NewDense(r, c, createFloatArrayByStep(r*c, 0.5, 0.5))
+			Convey("Then : Backward処理を実施", func() {
+				out := relu.Backward(dout)
+				act_r, act_c := out.Dims()
+				So(act_r, ShouldEqual, r)
+				So(act_c, ShouldEqual, c)
+				for i := 0; i < r; i++ {
+					for j := 0; j < c; j++ {
+						So(out.At(i, j), ShouldEqual, relu_backward(x.At(i, j), dout.At(i, j)))
 					}
 				}
 			})
@@ -47,4 +87,18 @@ func sigmoid_forward(x float64) float64 {
 
 func sigmoid_backward(x float64, dout float64) float64 {
 	return dout * (1.0 - sigmoid_forward(x)) * sigmoid_forward(x)
+}
+
+func relu_forward(x float64) float64 {
+	if x > 0 {
+		return x
+	}
+	return 0
+}
+
+func relu_backward(x float64, dout float64) float64 {
+	if x > 0 {
+		return dout
+	}
+	return 0
 }
