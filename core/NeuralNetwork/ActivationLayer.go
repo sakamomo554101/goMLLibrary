@@ -99,8 +99,8 @@ func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	r, c := dout.Dims()
 	dense := mat.NewDense(r, c, nil)
-	for i := 0; i < c; i++ {
-		for j := 0; j < r; j++ {
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
 			dense.Set(i, j, dout.At(i, j)*(1-math.Pow(tanh.out.At(i, j), 2)))
 		}
 	}
