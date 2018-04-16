@@ -18,3 +18,11 @@ func RandomFloatArray(min, max float64, count int) []float64 {
 	}
 	return list
 }
+func RandomIntArray(max int, count int) []int {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	list := make([]int, 0, count)
+	for i := 0; i < count; i++ {
+		list = append(list, r.Intn(max))
+	}
+	return list
+}

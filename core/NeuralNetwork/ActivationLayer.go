@@ -131,6 +131,7 @@ func (s *SoftmaxWithLoss) Forward(x mat.Matrix, t mat.Matrix) float64 {
 
 func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 	r, c := s.t.Dims()
+	// 誤差で伝搬する際は1データ分（バッチサイズ分で平均をとる）を返す
 	dense := mat.NewDense(1, c, nil)
 	bs := r
 
