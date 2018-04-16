@@ -56,7 +56,7 @@ func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 
 func (aff *Affine) Backward(dout mat.Matrix) mat.Matrix {
 	// dxの計算
-	r, c := aff.x.Dims()
+	r, c := dout.Dims()
 	dx := mat.NewDense(r, c, nil)
 	dx.Mul(dout, aff.w.T())
 

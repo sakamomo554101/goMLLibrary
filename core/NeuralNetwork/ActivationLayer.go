@@ -5,6 +5,10 @@ import (
 	"math"
 )
 
+const (
+	delta = 0.0000001 // logの中身が0にならないように対応
+)
+
 // Sigmoid : シグモイド関数
 type Sigmoid struct {
 	out mat.Matrix
@@ -113,7 +117,7 @@ type SoftmaxWithLoss struct {
 	loss float64
 }
 
-func NewSoftmax() *SoftmaxWithLoss {
+func NewSoftmaxWithLoss() *SoftmaxWithLoss {
 	s := &SoftmaxWithLoss{}
 	return s
 }
@@ -121,19 +125,19 @@ func NewSoftmax() *SoftmaxWithLoss {
 func (s *SoftmaxWithLoss) Forward(x mat.Matrix, t mat.Matrix) float64 {
 	s.t = t
 	s.out = s.softmax(x)
-	s.loss = s.crossEntropyError(x, t)
+	s.loss = s.crossEntropyError(s.out, t)
 	return s.loss
 }
 
 func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 	r, c := s.t.Dims()
-	dense := mat.NewDense(r, c, nil)
+	dense := mat.NewDense(1, c, nil)
 	bs := r
 
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
 			val := (s.out.At(i, j) - s.t.At(i, j)) / float64(bs)
-			dense.Set(i, j, val)
+			dense.Set(0, j, dense.At(0, j)+val)
 		}
 	}
 	return dense
@@ -141,8 +145,7 @@ func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 
 func (s *SoftmaxWithLoss) softmax(x mat.Matrix) mat.Matrix {
 	r, c := x.Dims()
-	tmp := mat.NewDense(r, c, nil)
-	tmp.Clone(x)
+	tmp := mat.DenseCopyOf(x)
 	dense := mat.NewDense(r, c, nil)
 	// 行の計算
 	for i := 0; i < r; i++ {
@@ -180,7 +183,6 @@ func (s *SoftmaxWithLoss) crossEntropyError(x mat.Matrix, t mat.Matrix) float64 
 	bs := xr
 
 	// 各値の交差エントロピーを求め、バッチサイズを考慮して平均を出力
-	delta := math.Pow10(-7) // logの中身が0にならないように対応
 	dense := mat.NewDense(xr, xc, nil)
 	for i := 0; i < xr; i++ {
 		for j := 0; j < xc; j++ {

@@ -118,6 +118,34 @@ func TestTanh(t *testing.T) {
 	})
 }
 
+func TestSoftmaxCrossEntropy(t *testing.T) {
+	Convey("Given : SoftmaxCrossEntropyレイヤーが一つ与えられた時", t, func() {
+		sce := NewSoftmaxWithLoss()
+		Convey("AND : 3次元ベクトルを2個入力するとする（2*3の行列）", nil)
+		r := 2 // データ数（バッチ数）
+		c := 3 // データの次元
+		Convey("When : 入力行列xと正解データが与えられた時", func() {
+			// [1,2,3]
+			// [4,5,7]
+			x := mat.NewDense(r, c, []float64{1, 2, 3, 4, 5, 7})
+			// [0,0,1]
+			// [1,0,0]
+			t := mat.NewDense(r, c, []float64{0, 0, 1, 1, 0, 0})
+			loss := sce.Forward(x, t)
+			Convey("Then : Forward処理を実施", func() {
+				loss_expected := softmaxCrossEntropy_forward(x, t)
+				So(loss, ShouldEqual, loss_expected)
+			})
+			Convey("Then : Backward処理を実施", func() {
+				douts := sce.Backward()
+				softmax_values := softmax_batch(x)
+				douts_expected := softmaxCrossEntropy_backward(softmax_values, t)
+				So(mat.Equal(douts, douts_expected), ShouldBeTrue)
+			})
+		})
+	})
+}
+
 func checkValue(act, exp, diff float64) {
 	So(math.Abs(act-exp), ShouldBeLessThan, diff)
 }
@@ -150,4 +178,95 @@ func tanh_forward(x float64) float64 {
 
 func tanh_backward(x float64, dout float64) float64 {
 	return dout * 4 / math.Pow(math.Exp(x)+math.Exp(-x), 2)
+}
+
+func softmaxCrossEntropy_forward_1batch(x []float64, tValues []float64) (loss float64) {
+	results := softmax(x)
+	loss = crossEntropy(results, tValues)
+	return
+}
+
+func softmaxCrossEntropy_forward(x mat.Matrix, t mat.Matrix) (loss float64) {
+	r, _ := x.Dims()
+	batch_size := r
+	x_dense := mat.DenseCopyOf(x)
+	t_dense := mat.DenseCopyOf(t)
+	for i := 0; i < r; i++ {
+		loss += softmaxCrossEntropy_forward_1batch(x_dense.RawRowView(i), t_dense.RawRowView(i))
+	}
+	return loss / float64(batch_size)
+}
+
+func softmaxCrossEntropy_backward_1batch(outs []float64, tValues []float64, batchSize int) []float64 {
+	if len(outs) != len(tValues) {
+		panic("softmatCrossEntropy_backward_1batch argument is not match!")
+	}
+	dx := make([]float64, 0, len(outs))
+	for i, out := range outs {
+		dxi := (out - tValues[i]) / float64(batchSize)
+		dx = append(dx, dxi)
+	}
+	return dx
+}
+
+func softmaxCrossEntropy_backward(out mat.Matrix, t mat.Matrix) mat.Matrix {
+	rout, cout := out.Dims()
+	rt, ct := t.Dims()
+	if rout != rt || cout != ct {
+		panic("softmatCrossEntropy_backward argument is not match!")
+	}
+
+	dense := mat.NewDense(1, cout, nil)
+	for i := 0; i < rout; i++ {
+		vs := softmaxCrossEntropy_backward_1batch(mat.DenseCopyOf(out).RawRowView(i), mat.DenseCopyOf(t).RawRowView(i), rout)
+		tmpDense := mat.NewDense(1, cout, vs)
+		dense.Add(dense, tmpDense)
+	}
+	return dense
+}
+
+func crossEntropy(values []float64, tValues []float64) float64 {
+	sum := 0.0
+	for i, v := range values {
+		sum += tValues[i] * math.Log(v+delta)
+	}
+	return -sum
+}
+
+func softmax(values []float64) []float64 {
+	// 最大値と合計値(Exp)を求める
+	max := values[0]
+	sum := 0.0
+	for _, v := range values {
+		max = math.Max(max, v)
+	}
+	for _, v := range values {
+		sum += math.Exp(v - max)
+	}
+
+	// 各列の値を求める
+	results := make([]float64, 0, len(values))
+	for _, v := range values {
+		result := math.Exp(v-max) / sum
+		results = append(results, result)
+	}
+	return results
+}
+
+func softmax_batch(values mat.Matrix) mat.Matrix {
+	r, c := values.Dims()
+	dense := mat.NewDense(r, c, nil)
+	for i := 0; i < r; i++ {
+		vs := softmax(mat.DenseCopyOf(values).RawRowView(i))
+		dense.SetRow(i, vs)
+	}
+	return dense
+}
+
+func max(values []float64) float64 {
+	max := values[0]
+	for _, v := range values {
+		max = math.Max(max, v)
+	}
+	return max
 }
