@@ -42,12 +42,11 @@ func (nnl *NeuralNetworkLayers) Backward() {
 
 // Update : 各レイヤーのパラメーターを勾配情報を元に更新
 func (nnl *NeuralNetworkLayers) Update() {
-	tmpLayers := make([]NeuralNetworkBaseLayer, 0, len(nnl.layers))
-	for _, layer := range nnl.layers {
+	for i, layer := range nnl.layers {
 		neuralNetworkLayer, ok := layer.(NeuralNetworkLayer)
 		if !ok {
 			// 重みをもっているレイヤーではないためスキップする
-			tmpLayers = append(tmpLayers, layer)
+			//tmpLayers = append(tmpLayers, layer)
 			continue
 		}
 
@@ -56,8 +55,6 @@ func (nnl *NeuralNetworkLayers) Update() {
 		grads := neuralNetworkLayer.GetGradients()
 		nnl.optimizer.Update(params, grads)
 		neuralNetworkLayer.UpdateParams(params)
-		// nnl.layers[i] = neuralNetworkLayer
-		tmpLayers = append(tmpLayers, neuralNetworkLayer)
+		nnl.layers[i] = neuralNetworkLayer
 	}
-	nnl.layers = tmpLayers
 }
