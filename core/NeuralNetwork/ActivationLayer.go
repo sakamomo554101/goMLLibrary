@@ -1,6 +1,7 @@
 package NeuralNetwork
 
 import (
+	"github.com/goMLLibrary/core/Util"
 	"gonum.org/v1/gonum/mat"
 	"math"
 )
@@ -122,22 +123,38 @@ func NewSoftmaxWithLoss() *SoftmaxWithLoss {
 	return s
 }
 
-func (s *SoftmaxWithLoss) Forward(x mat.Matrix, t mat.Matrix) float64 {
+func (s *SoftmaxWithLoss) Forward(x mat.Matrix, t mat.Matrix) (loss float64, accuracy float64) {
 	s.t = t
 	s.out = s.softmax(x)
 	s.loss = s.crossEntropyError(s.out, t)
-	return s.loss
+	accuracy = calcAccuracy(s.out, t)
+	return s.loss, accuracy
+}
+
+func calcAccuracy(out mat.Matrix, t mat.Matrix) float64 {
+	correct := 0
+	r, _ := out.Dims()
+	od := mat.DenseCopyOf(out)
+	td := mat.DenseCopyOf(t)
+	for i := 0; i < r; i++ {
+		key, _ := Util.MaxValue(od.RawRowView(i))
+		if td.At(i, key) == 1 {
+			correct++
+		}
+	}
+	return float64(correct) / float64(r)
 }
 
 func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 	r, c := s.t.Dims()
-	dense := mat.NewDense(1, c, nil)
+	dense := mat.NewDense(r, c, nil)
 	bs := r
 
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
+			// 誤差で伝搬する際は1データ分（バッチサイズ分で平均をとる）を返す
 			val := (s.out.At(i, j) - s.t.At(i, j)) / float64(bs)
-			dense.Set(0, j, dense.At(0, j)+val)
+			dense.Set(i, j, val)
 		}
 	}
 	return dense
