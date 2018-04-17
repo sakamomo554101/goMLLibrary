@@ -5,16 +5,21 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// NeuralNetworkLayer : ニューラルネットワークの素子に関するIF
-type NeuralNetworkLayer interface {
+// NeuralNetworkBaseLayer : ニューラルネットワークの素子に関する基本的なIF
+type NeuralNetworkBaseLayer interface {
 	// Forward : 順方向伝搬の実施
 	Forward(x mat.Matrix) mat.Matrix
 	// Backward : 逆方向伝搬の実施
 	Backward(dout mat.Matrix) mat.Matrix
+}
+
+// NeuralNetworkLayer : ニューラルネットワークの素子に関するIF
+type NeuralNetworkLayer interface {
+	NeuralNetworkBaseLayer
 	// GetParams : 各種パラメーターを取得
 	GetParams() map[string]mat.Matrix
 	// GetGradients : 各種勾配を取得
-	GetGradient() map[string]mat.Matrix
+	GetGradients() map[string]mat.Matrix
 	// UpdateParams : 各種パラメーターを更新
 	UpdateParams(map[string]mat.Matrix)
 }
@@ -29,8 +34,8 @@ type Affine struct {
 
 // NewAffine : アフィン変換の素子を取得
 func NewAffine(inputSize, outputSize int) *Affine {
-	w := mat.NewDense(inputSize, outputSize, Util.RandomFloatArray(-1, 1, inputSize*outputSize))
-	b := mat.NewVecDense(outputSize, Util.RandomFloatArray(-1, 1, outputSize))
+	w := mat.NewDense(inputSize, outputSize, Util.NormRandomArray(0.01, outputSize*inputSize))
+	b := mat.NewVecDense(outputSize, Util.NormRandomArray(0.01, outputSize))
 	a := Affine{}
 	a.w = w
 	a.b = b
@@ -56,14 +61,15 @@ func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 
 func (aff *Affine) Backward(dout mat.Matrix) mat.Matrix {
 	// dxの計算
-	r, c := dout.Dims()
+	// r, _ := dout.Dims()
+	r, c := aff.x.Dims()
 	dx := mat.NewDense(r, c, nil)
-	dx.Mul(dout, aff.w.T())
+	dx.Mul(dout, Util.Transpose(aff.w))
 
 	// dwの計算
 	r, c = aff.w.Dims()
 	dw := mat.NewDense(r, c, nil)
-	dw.Mul(aff.x.T(), dout)
+	dw.Mul(Util.Transpose(aff.x), dout)
 	aff.dw = dw
 
 	// dbの計算
@@ -88,8 +94,8 @@ func (aff *Affine) GetParams() map[string]mat.Matrix {
 
 func (aff *Affine) GetGradients() map[string]mat.Matrix {
 	grads := make(map[string]mat.Matrix)
-	grads["dw"] = aff.dw
-	grads["db"] = aff.db
+	grads["w"] = aff.dw
+	grads["b"] = aff.db
 	return grads
 }
 

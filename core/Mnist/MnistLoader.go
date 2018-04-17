@@ -25,10 +25,12 @@ func LoadData() (trainSet *MnistDataSet, testSet *MnistDataSet, err error) {
 
 type MnistDataSet struct {
 	dataSet []MnistData
+	nCol    int
+	nRow    int
 }
 
 func newMnistDataSet(set *GoMNIST.Set) *MnistDataSet {
-	dataSet := MnistDataSet{}
+	dataSet := MnistDataSet{nCol: set.NCol, nRow: set.NRow}
 	dataSet.dataSet = make([]MnistData, 0, set.Count())
 	for i, rawData := range set.Images {
 		data := newMnistDataFromGoMNISTData(rawData, uint8(set.Labels[i]))
@@ -39,7 +41,7 @@ func newMnistDataSet(set *GoMNIST.Set) *MnistDataSet {
 
 // ExtractRandomDataSet : 指定したmnistのデータセットからランダムに指定サイズ分だけのデータを抽出する
 func ExtractRandomDataSet(rawSet *MnistDataSet, count int) *MnistDataSet {
-	dataSet := MnistDataSet{}
+	dataSet := MnistDataSet{nCol: rawSet.nCol, nRow: rawSet.nRow}
 	dataSet.dataSet = make([]MnistData, 0, count)
 	if rawSet.Count() < count {
 		panic("count is not match!")
@@ -49,6 +51,18 @@ func ExtractRandomDataSet(rawSet *MnistDataSet, count int) *MnistDataSet {
 		dataSet.dataSet = append(dataSet.dataSet, rawSet.GetData(index))
 	}
 	return &dataSet
+}
+
+func ConvertMatrixFromDataSet(rawSet *MnistDataSet) (x mat.Matrix, labels mat.Matrix) {
+	row := rawSet.Count()
+	col := rawSet.nRow * rawSet.nCol
+	xDense := mat.NewDense(row, col, nil)
+	tDense := mat.NewDense(row, 10, nil)
+	for i, mnistData := range rawSet.GetDataSet() {
+		xDense.SetRow(i, mat.VecDenseCopyOf(mnistData.GetImageVector()).RawVector().Data)
+		tDense.SetRow(i, mat.VecDenseCopyOf(mnistData.GetLabelVector()).RawVector().Data)
+	}
+	return xDense, tDense
 }
 
 func (set *MnistDataSet) addData(data MnistData) {
@@ -65,6 +79,14 @@ func (set *MnistDataSet) GetDataSet() []MnistData {
 
 func (set *MnistDataSet) Count() int {
 	return len(set.dataSet)
+}
+
+func (set *MnistDataSet) GetNCol() int {
+	return set.nCol
+}
+
+func (set *MnistDataSet) GetNRow() int {
+	return set.nRow
 }
 
 type MnistData struct {
@@ -88,7 +110,7 @@ func (data *MnistData) GetImageVector() mat.Vector {
 	r := data.rawImage.Bounds().Max.X * data.rawImage.Bounds().Max.Y
 
 	vec := mat.NewVecDense(r, nil)
-	for i := 0; i < data.rawImage.Bounds().Max.Y; r++ {
+	for i := 0; i < data.rawImage.Bounds().Max.Y; i++ {
 		for j := 0; j < data.rawImage.Bounds().Max.X; j++ {
 			index := j + data.rawImage.Bounds().Max.X*i
 			vec.SetVec(index, float64(data.rawImage.At(j, i).(color.Gray).Y))
