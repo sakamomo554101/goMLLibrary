@@ -1,7 +1,7 @@
-package NeuralNetwork
+package neuralNetwork
 
 import (
-	"github.com/goMLLibrary/core/Util"
+	"github.com/goMLLibrary/core/util"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -34,8 +34,8 @@ type Affine struct {
 
 // NewAffine : アフィン変換の素子を取得
 func NewAffine(inputSize, outputSize int) *Affine {
-	w := mat.NewDense(inputSize, outputSize, Util.NormRandomArray(0.01, outputSize*inputSize))
-	b := mat.NewVecDense(outputSize, Util.NormRandomArray(0.01, outputSize))
+	w := mat.NewDense(inputSize, outputSize, util.NormRandomArray(0.01, outputSize*inputSize))
+	b := mat.NewVecDense(outputSize, util.NormRandomArray(0.01, outputSize))
 	a := Affine{}
 	a.w = w
 	a.b = b
@@ -64,12 +64,12 @@ func (aff *Affine) Backward(dout mat.Matrix) mat.Matrix {
 	// r, _ := dout.Dims()
 	r, c := aff.x.Dims()
 	dx := mat.NewDense(r, c, nil)
-	dx.Mul(dout, Util.Transpose(aff.w))
+	dx.Mul(dout, util.Transpose(aff.w))
 
 	// dwの計算
 	r, c = aff.w.Dims()
 	dw := mat.NewDense(r, c, nil)
-	dw.Mul(Util.Transpose(aff.x), dout)
+	dw.Mul(util.Transpose(aff.x), dout)
 	aff.dw = dw
 
 	// dbの計算

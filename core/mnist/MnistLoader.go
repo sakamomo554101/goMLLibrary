@@ -1,7 +1,7 @@
-package Mnist
+package mnist
 
 import (
-	"github.com/goMLLibrary/core/Util"
+	"github.com/goMLLibrary/core/util"
 	"github.com/petar/GoMNIST"
 	"gonum.org/v1/gonum/mat"
 	"image"
@@ -46,7 +46,7 @@ func ExtractRandomDataSet(rawSet *MnistDataSet, count int) *MnistDataSet {
 	if rawSet.Count() < count {
 		panic("count is not match!")
 	}
-	randomIndexs := Util.RandomIntArray(rawSet.Count(), count)
+	randomIndexs := util.RandomIntArray(rawSet.Count(), count)
 	for _, index := range randomIndexs {
 		dataSet.dataSet = append(dataSet.dataSet, rawSet.GetData(index))
 	}

@@ -1,4 +1,4 @@
-package Mnist
+package mnist
 
 import (
 	. "github.com/smartystreets/goconvey/convey"

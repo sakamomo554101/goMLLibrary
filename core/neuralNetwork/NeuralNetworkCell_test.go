@@ -1,4 +1,4 @@
-package NeuralNetwork
+package neuralNetwork
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
