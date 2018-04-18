@@ -1,4 +1,4 @@
-package NeuralNetwork
+package neuralNetwork
 
 func createFloatArrayByStep(count int, firstValue float64, stepValue float64) []float64 {
 	array := make([]float64, 0, count)

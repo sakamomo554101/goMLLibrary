@@ -1,7 +1,7 @@
-package NeuralNetwork
+package neuralNetwork
 
 import (
-	"github.com/goMLLibrary/core/Util"
+	"github.com/goMLLibrary/core/util"
 	"gonum.org/v1/gonum/mat"
 	"math"
 )
@@ -137,7 +137,7 @@ func calcAccuracy(out mat.Matrix, t mat.Matrix) float64 {
 	od := mat.DenseCopyOf(out)
 	td := mat.DenseCopyOf(t)
 	for i := 0; i < r; i++ {
-		key, _ := Util.MaxValue(od.RawRowView(i))
+		key, _ := util.MaxValue(od.RawRowView(i))
 		if td.At(i, key) == 1 {
 			correct++
 		}

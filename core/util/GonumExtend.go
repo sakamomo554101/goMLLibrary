@@ -1,4 +1,4 @@
-package Util
+package util
 
 import "gonum.org/v1/gonum/mat"
 
