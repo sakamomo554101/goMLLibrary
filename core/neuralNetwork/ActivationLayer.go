@@ -92,11 +92,9 @@ func NewTanh() *Tanh {
 func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 	r, c := x.Dims()
 	dense := mat.NewDense(r, c, nil)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			dense.Set(i, j, math.Tanh(x.At(i, j)))
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return math.Tanh(v)
+	}, x)
 	tanh.out = dense
 	return dense
 }
@@ -104,11 +102,9 @@ func (tanh *Tanh) Forward(x mat.Matrix) mat.Matrix {
 func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	r, c := dout.Dims()
 	dense := mat.NewDense(r, c, nil)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			dense.Set(i, j, dout.At(i, j)*(1-math.Pow(tanh.out.At(i, j), 2)))
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return v * (1 - math.Pow(tanh.out.At(i, j), 2))
+	}, dout)
 	return dense
 }
 
@@ -150,13 +146,9 @@ func (s *SoftmaxWithLoss) Backward() mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	bs := r
 
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			// 誤差で伝搬する際は1データ分（バッチサイズ分で平均をとる）を返す
-			val := (s.out.At(i, j) - s.t.At(i, j)) / float64(bs)
-			dense.Set(i, j, val)
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return (v - s.t.At(i, j)) / float64(bs)
+	}, s.out)
 	return dense
 }
 
@@ -201,11 +193,8 @@ func (s *SoftmaxWithLoss) crossEntropyError(x mat.Matrix, t mat.Matrix) float64 
 
 	// 各値の交差エントロピーを求め、バッチサイズを考慮して平均を出力
 	dense := mat.NewDense(xr, xc, nil)
-	for i := 0; i < xr; i++ {
-		for j := 0; j < xc; j++ {
-			val := -1 * t.At(i, j) * math.Log(x.At(i, j)+delta)
-			dense.Set(i, j, val)
-		}
-	}
+	dense.Apply(func(i, j int, v float64) float64 {
+		return -1 * v * math.Log(x.At(i, j)+delta)
+	}, t)
 	return mat.Sum(dense) / float64(bs)
 }

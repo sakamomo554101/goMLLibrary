@@ -118,6 +118,7 @@ func TestTanh(t *testing.T) {
 	})
 }
 
+// TODO : テストがこけるため要修正（テスト側の修正が必要）
 func TestSoftmaxCrossEntropy(t *testing.T) {
 	Convey("Given : SoftmaxCrossEntropyレイヤーが一つ与えられた時", t, func() {
 		sce := NewSoftmaxWithLoss()
@@ -131,7 +132,7 @@ func TestSoftmaxCrossEntropy(t *testing.T) {
 			// [0,0,1]
 			// [1,0,0]
 			t := mat.NewDense(r, c, []float64{0, 0, 1, 1, 0, 0})
-			loss := sce.Forward(x, t)
+			loss, _ := sce.Forward(x, t)
 			Convey("Then : Forward処理を実施", func() {
 				loss_expected := softmaxCrossEntropy_forward(x, t)
 				So(loss, ShouldEqual, loss_expected)
