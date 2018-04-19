@@ -13,6 +13,6 @@ deps:
 	go get -u github.com/petar/GoMNIST
 	rm -rf $(shell pwd)/vendor/github.com/petar/
 
-.PHONY: update
-update:
-	# TODO : imp
+.PHONY: build-sample
+build-sample:
+	go run ./main/MnistSample.go
