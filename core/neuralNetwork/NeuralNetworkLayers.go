@@ -9,8 +9,8 @@ type NeuralNetworkLayers struct {
 	optimizer           Optimizer
 }
 
-// NewNeuralNetworkLayers : NeuralNetworkLayersのインスタンスを作成
-func NewNeuralNetworkLayers() *NeuralNetworkLayers {
+// NewDefaultNeuralNetworkLayers : NeuralNetworkLayersのインスタンスを作成
+func NewDefaultNeuralNetworkLayers() *NeuralNetworkLayers {
 	nnl := NeuralNetworkLayers{}
 	nnl.layers = make([]NeuralNetworkBaseLayer, 0)
 	nnl.lastActivationLayer = NewSoftmaxWithLoss()
@@ -21,6 +21,16 @@ func NewNeuralNetworkLayers() *NeuralNetworkLayers {
 // Add : ニューラルネットワークの素子を追加
 func (nnl *NeuralNetworkLayers) Add(layer NeuralNetworkBaseLayer) {
 	nnl.layers = append(nnl.layers, layer)
+}
+
+// SetOptimizer : optimizerの設定
+func (nnl *NeuralNetworkLayers) SetOptimizer(optimizer Optimizer) {
+	nnl.optimizer = optimizer
+}
+
+// SetLastActivationLayer : ニューラルネットワークの最終層を設定
+func (nnl *NeuralNetworkLayers) SetLastActivationLayer(layer *SoftmaxWithLoss) {
+	nnl.lastActivationLayer = layer
 }
 
 // Forward : 順伝搬処理の実施
@@ -57,4 +67,19 @@ func (nnl *NeuralNetworkLayers) Update() {
 		neuralNetworkLayer.UpdateParams(params)
 		nnl.layers[i] = neuralNetworkLayer
 	}
+}
+
+// GetLayers : レイヤー情報を取得
+func (nnl *NeuralNetworkLayers) GetLayers() []NeuralNetworkBaseLayer {
+	return nnl.layers
+}
+
+// GetOptimizer : optimizer情報を取得
+func (nnl *NeuralNetworkLayers) GetOptimizer() Optimizer {
+	return nnl.optimizer
+}
+
+// GetLastActivationLayer : 最終的な活性化レイヤーを取得
+func (nnl *NeuralNetworkLayers) GetLastActivationLayer() *SoftmaxWithLoss {
+	return nnl.lastActivationLayer
 }
