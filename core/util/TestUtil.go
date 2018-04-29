@@ -1,6 +1,7 @@
-package neuralNetwork
+package util
 
-func createFloatArrayByStep(count int, firstValue float64, stepValue float64) []float64 {
+// CreateFloatArrayByStep : floatの配列を作成
+func CreateFloatArrayByStep(count int, firstValue float64, stepValue float64) []float64 {
 	array := make([]float64, 0, count)
 	for i := 0; i < count; i++ {
 		val := firstValue + stepValue*float64(i)
