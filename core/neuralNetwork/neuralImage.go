@@ -20,6 +20,16 @@ func NewImage(input []float64, w int, h int) Image {
 	return image
 }
 
+// GetWidth : 画像の幅を取得
+func (img Image) GetWidth() int {
+	return len(img[0])
+}
+
+// GetHeight : 画像の高さを取得
+func (img Image) GetHeight() int {
+	return len(img)
+}
+
 // ImageWithChannel : 複数チャネル（RGBなど）を持つ画像データを格納する配列データ
 type ImageWithChannel []Image
 
@@ -39,6 +49,21 @@ func NewImageWithChannel(input []float64, w int, h int, c int) ImageWithChannel 
 		iwc = append(iwc, image)
 	}
 	return iwc
+}
+
+// GetWidth : 画像の幅を取得
+func (iwc ImageWithChannel) GetWidth() int {
+	return iwc[0].GetWidth()
+}
+
+// GetHeight : 画像の高さを取得
+func (iwc ImageWithChannel) GetHeight() int {
+	return iwc[0].GetHeight()
+}
+
+// GetChennel : 画像のチャネル数を取得
+func (iwc ImageWithChannel) GetChennel() int {
+	return len(iwc)
 }
 
 // ImagesWithChannel : 複数チャネルを持つ画像データを複数格納した配列データ
@@ -61,4 +86,24 @@ func NewImagesWithChannel(input []float64, w int, h int, c int, batch int) Image
 		iwcb = append(iwcb, imageWithChannel)
 	}
 	return iwcb
+}
+
+// GetWidth : 画像の幅を取得
+func (iwcb ImagesWithChannel) GetWidth() int {
+	return iwcb[0].GetWidth()
+}
+
+// GetHeight : 画像の高さを取得
+func (iwcb ImagesWithChannel) GetHeight() int {
+	return iwcb[0].GetHeight()
+}
+
+// GetChennel : 画像のチャネル数を取得
+func (iwcb ImagesWithChannel) GetChannel() int {
+	return iwcb[0].GetChennel()
+}
+
+// GetBatchCount : 画像の数を取得
+func (iwcb ImagesWithChannel) GetBatchCount() int {
+	return len(iwcb)
 }
