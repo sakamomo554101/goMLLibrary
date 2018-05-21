@@ -1,21 +1,35 @@
-package neuralNetwork
+package image
 
 // Image : ニューラルネットワークでの画像データ（1チャンネル分）を格納する配列データ
 type Image [][]float64
 
 // NewImage : 単一チャネルの画像データを格納する配列データを作成
+// パディング対応しており、パディング分は0でデータを埋める
 // input : 画像の元データを格納した配列データ
 // w : 幅
 // h : 高さ
-func NewImage(input []float64, w int, h int) Image {
+// padding : パディングサイズ
+func NewImage(input []float64, w int, h int, padding int) Image {
 	if len(input) != w*h {
 		panic("入力された画像データと指定した幅・高さがマッチしてません")
 	}
-	image := make([][]float64, 0, h)
-
-	for i := 0; i < h; i++ {
-		row := input[i*w : (i+1)*w]
-		image = append(image, row)
+	if padding < 0 {
+		panic("パディングサイズに負の値が設定されています")
+	}
+	image := make([][]float64, h+padding*2, h+padding*2)
+	for i := 0; i < len(image); i++ {
+		row := make([]float64, 0, w+padding*2)
+		if i >= padding && i < len(image)-padding {
+			// パディング分は0に設定するために複数回appendしている
+			// TODO : もっとスマートな書き方がありそう
+			row = append(row, make([]float64, padding, padding)...)
+			row = append(row, input[(i-padding)*w:(i-padding+1)*w]...)
+			row = append(row, make([]float64, padding, padding)...)
+		} else {
+			// パディング箇所のため、0でうめる
+			row = append(row, make([]float64, w+padding*2, w+padding*2)...)
+		}
+		image[i] = row
 	}
 	return image
 }
@@ -34,18 +48,20 @@ func (img Image) GetHeight() int {
 type ImageWithChannel []Image
 
 // NewImageWithChannel : 複数チャネルを持つ画像データを作成
+// パディング対応しており、パディング分は0でデータを埋める
 // input : 画像の元データを格納した配列データ
 // w : 幅
 // h : 高さ
 // c : チャネル数
-func NewImageWithChannel(input []float64, w int, h int, c int) ImageWithChannel {
+// padding : パディングサイズ
+func NewImageWithChannel(input []float64, w int, h int, c int, padding int) ImageWithChannel {
 	if len(input) != w*h*c {
 		panic("入力された画像データと指定した幅・高さ・チャネル数がマッチしてません")
 	}
 	iwc := make([]Image, 0, c)
 
 	for i := 0; i < c; i++ {
-		image := NewImage(input[i*w*h:(i+1)*w*h], w, h)
+		image := NewImage(input[i*w*h:(i+1)*w*h], w, h, padding)
 		iwc = append(iwc, image)
 	}
 	return iwc
@@ -70,19 +86,21 @@ func (iwc ImageWithChannel) GetChennel() int {
 type ImagesWithChannel []ImageWithChannel
 
 // NewImagesWithChannel : 複数チャネルを持つ画像データを作成
+// パディング対応しており、パディング分は0でデータを埋める
 // input : 画像の元データを格納した配列データ
 // w : 幅
 // h : 高さ
 // c : チャネル数
 // batch : 画像データ数（バッチ数）
-func NewImagesWithChannel(input []float64, w int, h int, c int, batch int) ImagesWithChannel {
+// padding : パディングサイズ
+func NewImagesWithChannel(input []float64, w int, h int, c int, batch int, padding int) ImagesWithChannel {
 	if len(input) != w*h*c*batch {
 		panic("入力された画像データと指定した幅・高さ・チャネル数・画像数がマッチしてません")
 	}
 	iwcb := make([]ImageWithChannel, 0, batch)
 
 	for i := 0; i < batch; i++ {
-		imageWithChannel := NewImageWithChannel(input[i*w*h*c:(i+1)*w*h*c], w, h, c)
+		imageWithChannel := NewImageWithChannel(input[i*w*h*c:(i+1)*w*h*c], w, h, c, padding)
 		iwcb = append(iwcb, imageWithChannel)
 	}
 	return iwcb

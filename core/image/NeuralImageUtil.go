@@ -1,9 +1,6 @@
-package util
+package image
 
-import (
-	"github.com/goMLLibrary/core/neuralNetwork"
-	"gonum.org/v1/gonum/mat"
-)
+import "gonum.org/v1/gonum/mat"
 
 // Im2col : 各画像データ（複数チャネルを保持しているため、3次元データ）をベクトルデータに変換する
 // 出力値は各画像データ分のベクトルとなるため、行列データとなる
@@ -12,9 +9,9 @@ import (
 // filterW : フィルタの幅
 // stride : ストライドのサイズ
 // padding : パディングのサイズ
-func Im2col(input neuralNetwork.ImagesWithChannel, filterH int, filterW int, stride int, padding int) mat.Matrix {
+func Im2col(input ImagesWithChannel, filterH int, filterW int, stride int, padding int) mat.Matrix {
 	// 2次元の行列サイズを確定させる
-	ow := (input.GetWidth()+2*padding-filterW)/stride + 1
+	/*ow := (input.GetWidth()+2*padding-filterW)/stride + 1
 	oh := (input.GetHeight()+2*padding-filterH)/stride + 1
 	batch := input.GetBatchCount()
 	channel := input.GetChannel()
@@ -22,5 +19,6 @@ func Im2col(input neuralNetwork.ImagesWithChannel, filterH int, filterW int, str
 	matrixH := ow * oh * batch
 
 	// 2次元の行列を初期化
-	dense := mat.NewDense(matrixW, matrixH, nil)
+	dense := mat.NewDense(matrixW, matrixH, nil)*/
+	return nil
 }
