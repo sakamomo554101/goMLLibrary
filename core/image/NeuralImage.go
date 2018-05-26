@@ -103,7 +103,7 @@ func (iwc ImageWithChannel) GetChennel() int {
 // im2Col : 3次元情報を（フィルタでの計算を行うために）2次元に変換
 // 行サイズ：出力幅×出力高さ
 // 列サイズ：フィルタサイズ×フィルタサイズ×チャネル数
-func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) ([][]float64, error) {
+func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) [][]float64 {
 	col := make([][]float64, 0, ow*oh)
 
 	// チャネル毎のデータを結合する
@@ -116,7 +116,7 @@ func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) (
 		}
 		col = append(col, row)
 	}
-	return col, nil
+	return col
 }
 
 // ImagesWithChannel : 複数チャネルを持つ画像データを複数格納した配列データ
@@ -181,6 +181,12 @@ func (iwcb ImagesWithChannel) Im2Col(stride int, karnelSize int) (mat.Matrix, er
 	dense := mat.NewDense(rowSize, colSize, nil)
 
 	// 各画像毎にim2colを実施する
-
+	// 取得した2次元データを順番にmatrixに追加する
+	for b, iwc := range iwcb {
+		cols := iwc.im2Col(ow, oh, stride, karnelSize)
+		for i, col := range cols {
+			dense.SetCol(b*ow*oh+i, col)
+		}
+	}
 	return dense, nil
 }
