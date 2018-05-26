@@ -1,5 +1,7 @@
 package image
 
+import "gonum.org/v1/gonum/mat"
+
 // Image : ニューラルネットワークでの画像データ（1チャンネル分）を格納する配列データ
 type Image [][]float64
 
@@ -44,6 +46,22 @@ func (img Image) GetHeight() int {
 	return len(img)
 }
 
+// getIm2ColWindow : im2colで計算するために画像をカーネルサイズ×出力面積とする
+func (img Image) getIm2ColWindow(ow int, oh int, stride int, karnelSize int) [][]float64 {
+	window := make([][]float64, 0, ow*oh)
+	rowSize := karnelSize * karnelSize
+	for h := 0; h < oh; h += stride {
+		for w := 0; w < ow; w += stride {
+			row := make([]float64, 0, rowSize)
+			for k := 0; k < karnelSize; k++ {
+				row = append(row, img[h][w:w+karnelSize+1]...)
+			}
+			window = append(window, row)
+		}
+	}
+	return window
+}
+
 // ImageWithChannel : 複数チャネル（RGBなど）を持つ画像データを格納する配列データ
 type ImageWithChannel []Image
 
@@ -80,6 +98,25 @@ func (iwc ImageWithChannel) GetHeight() int {
 // GetChennel : 画像のチャネル数を取得
 func (iwc ImageWithChannel) GetChennel() int {
 	return len(iwc)
+}
+
+// im2Col : 3次元情報を（フィルタでの計算を行うために）2次元に変換
+// 行サイズ：出力幅×出力高さ
+// 列サイズ：フィルタサイズ×フィルタサイズ×チャネル数
+func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) ([][]float64, error) {
+	col := make([][]float64, 0, ow*oh)
+
+	// チャネル毎のデータを結合する
+	// 行：ow*ohのサイズ
+	// 列：filterSize*filterSize*channelのサイズ
+	for i := 0; i < ow*oh; i++ {
+		row := make([]float64, karnelSize*karnelSize*iwc.GetChennel())
+		for c := 0; c < iwc.GetChennel(); c++ {
+			row = append(row, iwc[c].getIm2ColWindow(ow, oh, stride, karnelSize)[i]...)
+		}
+		col = append(col, row)
+	}
+	return col, nil
 }
 
 // ImagesWithChannel : 複数チャネルを持つ画像データを複数格納した配列データ
@@ -124,4 +161,26 @@ func (iwcb ImagesWithChannel) GetChannel() int {
 // GetBatchCount : 画像の数を取得
 func (iwcb ImagesWithChannel) GetBatchCount() int {
 	return len(iwcb)
+}
+
+// Im2Col : 4次元情報を（フィルタ計算のために）2次元情報へ変換する
+// 行サイズ：出力幅×出力高さ×データ数
+// 列サイズ：フィルタサイズ×フィルタサイズ×チャネル数
+func (iwcb ImagesWithChannel) Im2Col(stride int, karnelSize int) (mat.Matrix, error) {
+	ow, err := getOutSize(iwcb.GetWidth(), karnelSize, stride, 0)
+	if err != nil {
+		return nil, err
+	}
+	oh, err := getOutSize(iwcb.GetHeight(), karnelSize, stride, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	rowSize := ow * oh * iwcb.GetBatchCount()
+	colSize := karnelSize * karnelSize * iwcb.GetChannel()
+	dense := mat.NewDense(rowSize, colSize, nil)
+
+	// 各画像毎にim2colを実施する
+
+	return dense, nil
 }
