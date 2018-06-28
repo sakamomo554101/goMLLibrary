@@ -1,0 +1,6 @@
+## CNNの流れ
+
+### 必要なモジュール
+
+* Convolution Layer
+* Pooling Layer (Max or Average)

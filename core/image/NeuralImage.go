@@ -1,6 +1,15 @@
 package image
 
-import "gonum.org/v1/gonum/mat"
+type NeuralImageShape struct {
+	Width   int
+	Height  int
+	Channel int
+}
+
+type FilterSetting struct {
+	Stride  int
+	Padding int
+}
 
 // Image : ニューラルネットワークでの画像データ（1チャンネル分）を格納する配列データ
 type Image [][]float64
@@ -161,32 +170,4 @@ func (iwcb ImagesWithChannel) GetChannel() int {
 // GetBatchCount : 画像の数を取得
 func (iwcb ImagesWithChannel) GetBatchCount() int {
 	return len(iwcb)
-}
-
-// Im2Col : 4次元情報を（フィルタ計算のために）2次元情報へ変換する
-// 行サイズ：出力幅×出力高さ×データ数
-// 列サイズ：フィルタサイズ×フィルタサイズ×チャネル数
-func (iwcb ImagesWithChannel) Im2Col(stride int, karnelSize int) (mat.Matrix, error) {
-	ow, err := getOutSize(iwcb.GetWidth(), karnelSize, stride, 0)
-	if err != nil {
-		return nil, err
-	}
-	oh, err := getOutSize(iwcb.GetHeight(), karnelSize, stride, 0)
-	if err != nil {
-		return nil, err
-	}
-
-	rowSize := ow * oh * iwcb.GetBatchCount()
-	colSize := karnelSize * karnelSize * iwcb.GetChannel()
-	dense := mat.NewDense(rowSize, colSize, nil)
-
-	// 各画像毎にim2colを実施する
-	// 取得した2次元データを順番にmatrixに追加する
-	for b, iwc := range iwcb {
-		cols := iwc.im2Col(ow, oh, stride, karnelSize)
-		for i, col := range cols {
-			dense.SetCol(b*ow*oh+i, col)
-		}
-	}
-	return dense, nil
 }

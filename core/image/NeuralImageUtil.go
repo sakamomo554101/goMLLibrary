@@ -8,26 +8,36 @@ import (
 // Im2col : 各画像データ（複数チャネルを保持しているため、3次元データ）をベクトルデータに変換する
 // 出力値は各画像データ分のベクトルとなるため、行列データとなる
 // input : 複数チャネルを持つ画像を複数入力
-// filterH : フィルタの高さ
-// filterW : フィルタの幅
+// filterSize : フィルタサイズ（高さと幅、ともに同じ大きさ）
 // stride : ストライドのサイズ
-// padding : パディングのサイズ
-func Im2col(input ImagesWithChannel, filterH int, filterW int, stride int, padding int) mat.Matrix {
-	// 2次元の行列サイズを確定させる
-	ow := (input.GetWidth()+2*padding-filterW)/stride + 1
-	oh := (input.GetHeight()+2*padding-filterH)/stride + 1
-	batch := input.GetBatchCount()
-	channel := input.GetChannel()
-	matrixW := filterW * filterH * channel
-	matrixH := ow * oh * batch
+func Im2col(input ImagesWithChannel, filterSize int, stride int) (mat.Matrix, error) {
+	ow, err := getOutSize(input.GetWidth(), filterSize, stride, 0)
+	if err != nil {
+		return nil, err
+	}
+	oh, err := getOutSize(input.GetHeight(), filterSize, stride, 0)
+	if err != nil {
+		return nil, err
+	}
 
-	// 2次元の行列を初期化
-	dense := mat.NewDense(matrixW, matrixH, nil)
+	rowSize := ow * oh * input.GetBatchCount()
+	colSize := filterSize * filterSize * input.GetChannel()
+	dense := mat.NewDense(rowSize, colSize, nil)
 
-	// 4次元データを2次元情報に変換する
-
-	return nil
+	// 各画像毎にim2colを実施する
+	// 取得した2次元データを順番にmatrixに追加する
+	for b, iwc := range input {
+		cols := iwc.im2Col(ow, oh, stride, filterSize)
+		for i, col := range cols {
+			dense.SetCol(b*ow*oh+i, col)
+		}
+	}
+	return dense, nil
 }
+
+/*func Col2im(col mat.Matrix, inputSize []int, filterSize int, stride int) (ImagesWithChannel, error) {
+
+}*/
 
 // getOutSize : フィルタをかけた際の出力サイズを計算する
 // サイズを計算した際に割り切れなかった場合はエラーを返す
