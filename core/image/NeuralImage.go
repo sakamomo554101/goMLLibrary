@@ -1,14 +1,17 @@
 package image
 
-type NeuralImageShape struct {
-	Width   int
-	Height  int
-	Channel int
-}
+import "gonum.org/v1/gonum/mat"
 
-type FilterSetting struct {
-	Stride  int
-	Padding int
+// NeuralImageShape : 画像の形を定義した構造体
+type NeuralImageShape struct {
+	// Width : 画像の幅
+	Width int
+	// Height : 画像の高さ
+	Height int
+	// Channel : 画像のチャネル数
+	Channel int
+	// BatchSize : 画像の数（バッチ数）
+	BatchSize int
 }
 
 // Image : ニューラルネットワークでの画像データ（1チャンネル分）を格納する配列データ
@@ -147,6 +150,21 @@ func NewImagesWithChannel(input []float64, w int, h int, c int, batch int, paddi
 
 	for i := 0; i < batch; i++ {
 		imageWithChannel := NewImageWithChannel(input[i*w*h*c:(i+1)*w*h*c], w, h, c, padding)
+		iwcb = append(iwcb, imageWithChannel)
+	}
+	return iwcb
+}
+
+func NewImagesWithChannelFromMatrix(input mat.Matrix, w, h, c, padding int) ImagesWithChannel {
+	imageSize, batch := input.Dims()
+	if imageSize != w*h*c {
+		panic("入力された画像データと指定した幅・高さ・チャネル数がマッチしてません")
+	}
+
+	iwcb := make([]ImageWithChannel, 0, batch)
+	dense := mat.DenseCopyOf(input)
+	for i := 0; i < batch; i++ {
+		imageWithChannel := NewImageWithChannel(dense.RawRowView(i), w, h, c, padding)
 		iwcb = append(iwcb, imageWithChannel)
 	}
 	return iwcb

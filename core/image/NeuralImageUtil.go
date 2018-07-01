@@ -11,11 +11,11 @@ import (
 // filterSize : フィルタサイズ（高さと幅、ともに同じ大きさ）
 // stride : ストライドのサイズ
 func Im2col(input ImagesWithChannel, filterSize int, stride int) (mat.Matrix, error) {
-	ow, err := getOutSize(input.GetWidth(), filterSize, stride, 0)
+	ow, err := GetOutSize(input.GetWidth(), filterSize, stride, 0)
 	if err != nil {
 		return nil, err
 	}
-	oh, err := getOutSize(input.GetHeight(), filterSize, stride, 0)
+	oh, err := GetOutSize(input.GetHeight(), filterSize, stride, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -39,15 +39,15 @@ func Im2col(input ImagesWithChannel, filterSize int, stride int) (mat.Matrix, er
 
 }*/
 
-// getOutSize : フィルタをかけた際の出力サイズを計算する
+// GetOutSize : フィルタをかけた際の出力サイズを計算する
 // サイズを計算した際に割り切れなかった場合はエラーを返す
-func getOutSize(inputSize int, filterSize int, stride int, padding int) (int, error) {
+func GetOutSize(inputSize int, filterSize int, stride int, padding int) (int, error) {
 	n := inputSize + 2*padding - filterSize
 	if n < 0 {
-		return 0, errors.New("getOutSize : 分子の計算結果が負になっているため、入力値が誤っています")
+		return 0, errors.New("GetOutSize : 分子の計算結果が負になっているため、入力値が誤っています")
 	}
 	if n%stride != 0 {
-		return 0, errors.New("getOutSize : 出力サイズが小数となっているため、入力値が誤っています")
+		return 0, errors.New("GetOutSize : 出力サイズが小数となっているため、入力値が誤っています")
 	}
 	return n/stride + 1, nil
 }
