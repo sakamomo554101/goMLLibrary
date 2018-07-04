@@ -55,7 +55,8 @@ func (con *Convolution) Forward(x mat.Matrix) mat.Matrix {
 	dense := mat.NewDense(r, c, nil)
 	dense.Mul(img, con.w)
 
-	// TODO : バイアスを加算する
+	// バイアスを加算する
+	util.AddVecToMatrixCol(dense, con.b)
 
 	// 行列を整形する（row : batch, col : ow * oh * FN）
 	ow, err := image.GetOutSize(con.inputShape.Width, con.filterShape.Width, con.stride, con.padding)
@@ -74,15 +75,27 @@ func (con *Convolution) Backward(dout mat.Matrix) mat.Matrix {
 }
 
 func (con *Convolution) GetParams() map[string]mat.Matrix {
-	return nil
+	params := make(map[string]mat.Matrix)
+	params["w"] = con.w
+	params["b"] = con.b
+	return params
 }
 
 func (con *Convolution) GetGradients() map[string]mat.Matrix {
-	return nil
+	grads := make(map[string]mat.Matrix)
+	grads["w"] = con.dw
+	grads["b"] = con.db
+	return grads
 }
 
 func (con *Convolution) UpdateParams(params map[string]mat.Matrix) {
+	// パラメータのアップデート
+	con.w = params["w"]
+	con.b = mat.DenseCopyOf(params["b"]).ColView(0)
 
+	// 勾配のリセット
+	con.dw = nil
+	con.db = nil
 }
 
 type MaxPooling struct {

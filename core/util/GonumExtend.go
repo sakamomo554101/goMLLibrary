@@ -39,3 +39,16 @@ func RawValues(a mat.Matrix) []float64 {
 	}
 	return rawValues
 }
+
+// AddVecToMatrixCol : vectorを行方向にmatrixに加算する
+// ex) 3次元のベクトルを4*3の行列に加算するケース
+func AddVecToMatrixCol(d *mat.Dense, vec mat.Vector) {
+	_, c := d.Dims()
+	if c != vec.Len() {
+		panic("AddVecToMatrixCol Error : ベクトルの次元数と行列の列数が一致していません")
+	}
+
+	d.Apply(func(i, j int, v float64) float64 {
+		return vec.AtVec(j) + v
+	}, d)
+}

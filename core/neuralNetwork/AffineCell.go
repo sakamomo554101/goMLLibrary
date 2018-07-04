@@ -34,9 +34,10 @@ func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 	_, outputSize := aff.w.Dims()
 	d := mat.NewDense(batchSize, outputSize, nil)
 	d.Mul(aff.x, aff.w)
-	d.Apply(func(i, j int, v float64) float64 {
+	/*d.Apply(func(i, j int, v float64) float64 {
 		return aff.b.AtVec(j) + v
-	}, d)
+	}, d)*/
+	util.AddVecToMatrixCol(d, aff.b)
 	return d
 }
 
