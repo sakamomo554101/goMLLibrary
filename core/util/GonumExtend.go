@@ -59,13 +59,43 @@ func AddVecToMatrixCol(d *mat.Dense, vec mat.Vector) {
 // [2,2,2]
 // [3,3,3]
 // = [6,6,6]
-func SumEachCol(x *mat.Dense) mat.Vector {
+func SumEachCol(x mat.Matrix) mat.Vector {
 	r, c := x.Dims()
 	vec := mat.NewVecDense(c, nil)
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
 			tmpVal := vec.AtVec(j)
 			vec.SetVec(j, tmpVal+x.At(i, j))
+		}
+	}
+	return vec
+}
+
+// SumEachRow : 行列の各行について、合計値を計算し、ベクトルに変換する
+// ex) 3*3の行列の場合、3*1のベクトルとなる
+func SumEachRow(x mat.Matrix) mat.Vector {
+	r, c := x.Dims()
+	vec := mat.NewVecDense(r, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			tmpVal := vec.AtVec(i)
+			vec.SetVec(i, tmpVal+x.At(i, j))
+		}
+	}
+	return vec
+}
+
+// MaxEachRow : 行列の各行について、最大値を選択し、ベクトルに変換する
+// ex) 3*3の行列の場合、3*1のベクトルとなる
+func MaxEachRow(x mat.Matrix) mat.Vector {
+	r, c := x.Dims()
+	vec := mat.NewVecDense(r, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			tmpVal := vec.AtVec(i)
+			if tmpVal < x.At(i, j) {
+				vec.SetVec(i, x.At(i, j))
+			}
 		}
 	}
 	return vec

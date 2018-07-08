@@ -34,9 +34,6 @@ func (aff *Affine) Forward(x mat.Matrix) mat.Matrix {
 	_, outputSize := aff.w.Dims()
 	d := mat.NewDense(batchSize, outputSize, nil)
 	d.Mul(aff.x, aff.w)
-	/*d.Apply(func(i, j int, v float64) float64 {
-		return aff.b.AtVec(j) + v
-	}, d)*/
 	util.AddVecToMatrixCol(d, aff.b)
 	return d
 }
@@ -54,15 +51,7 @@ func (aff *Affine) Backward(dout mat.Matrix) mat.Matrix {
 	aff.dw = dw
 
 	// dbの計算
-	r, c = dout.Dims()
-	db := mat.NewVecDense(aff.b.Len(), nil)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			tmpVal := db.AtVec(j)
-			db.SetVec(j, tmpVal+dout.At(i, j))
-		}
-	}
-	aff.db = db
+	aff.db = util.SumEachCol(dout)
 	return dx
 }
 

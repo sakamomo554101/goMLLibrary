@@ -6,6 +6,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// Convolution : 畳み込み層の機能を持つモジュール
 type Convolution struct {
 	// parameter
 	w mat.Matrix
@@ -40,6 +41,8 @@ func NewConvolution(stride, padding int, inputShape image.NeuralImageShape, filt
 }
 
 func (con *Convolution) Forward(x mat.Matrix) mat.Matrix {
+	con.x = x
+
 	// 入力データは画像データ×画像数のため、まず画像の構造体に変換する
 	iwcb := image.NewImagesWithChannelFromMatrix(x, con.inputShape.Width, con.inputShape.Height, con.inputShape.Channel, con.padding)
 
@@ -71,7 +74,20 @@ func (con *Convolution) Forward(x mat.Matrix) mat.Matrix {
 }
 
 func (con *Convolution) Backward(dout mat.Matrix) mat.Matrix {
-	return nil
+	// dxの計算
+	r, c := con.x.Dims()
+	dx := mat.NewDense(r, c, nil)
+	dx.Mul(dout, util.Transpose(con.w))
+
+	// dwの計算
+	r, c = con.w.Dims()
+	dw := mat.NewDense(r, c, nil)
+	dw.Mul(util.Transpose(con.x), dout)
+	con.dw = dw
+
+	// dbの計算
+	con.db = util.SumEachCol(dout)
+	return dx
 }
 
 func (con *Convolution) GetParams() map[string]mat.Matrix {
@@ -98,5 +114,58 @@ func (con *Convolution) UpdateParams(params map[string]mat.Matrix) {
 	con.db = nil
 }
 
+// MaxPooling : 最大値を伝達するプーリング層
 type MaxPooling struct {
+	// filter setting
+	poolingShape image.NeuralImageShape
+
+	// input parameter
+	inputShape image.NeuralImageShape
+}
+
+func NewMaxPooling(inputShape image.NeuralImageShape, poolingW, poolingH int) *MaxPooling {
+	poolingShape := image.NewNeuralImageShape(poolingW, poolingH, 1, 1)
+	return &MaxPooling{poolingShape: poolingShape, inputShape: inputShape}
+}
+
+func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
+	padding := 0
+	stride := mp.poolingShape.Width
+
+	// 入力データは画像データ×画像数のため、まず画像の構造体に変換する
+	iwcb := image.NewImagesWithChannelFromMatrix(x, mp.inputShape.Width, mp.inputShape.Height, mp.inputShape.Channel, padding)
+
+	// 画像を4次元からフィルタ演算をしやすいように2次元に変換
+	img, err := image.Im2col(iwcb, mp.poolingShape.Width, stride)
+	if err != nil {
+		panic("Convolution#Forward : forward処理に失敗しました. err = " + err.Error())
+	}
+
+	// プーリングのサイズに合わせて、行列をreshapeする
+	// 変換前 => row : ow * oh * N , col : poolingW * poolingH * Channel
+	// 変換後 => row : ow * oh * Channel * N, col : poolingW * poolingH
+	ow, err := image.GetOutSize(mp.inputShape.Width, mp.poolingShape.Width, stride, padding)
+	if err != nil {
+		panic("Convolution#Forward : 出力幅の取得に失敗しました")
+	}
+	oh, err := image.GetOutSize(mp.inputShape.Height, mp.poolingShape.Height, stride, padding)
+	if err != nil {
+		panic("Convolution#Forward : 出力高の取得に失敗しました")
+	}
+	r := ow * oh * iwcb.GetChannel() * iwcb.GetBatchCount()
+	c := mp.poolingShape.Width * mp.poolingShape.Height
+	img = util.Reshape(img, r, c)
+
+	// プーリング処理を行う
+	vec := util.MaxEachRow(img)
+
+	// ベクトルを再度行列に直す
+	// 変換前 => ow * oh * Channel * N
+	// 変換後 => row : N, col : ow * oh * Channel
+	img = util.Reshape(vec, ow*oh*iwcb.GetChannel(), iwcb.GetBatchCount())
+	return img
+}
+
+func (mp *MaxPooling) Backward(dout mat.Matrix) mat.Matrix {
+	return nil
 }

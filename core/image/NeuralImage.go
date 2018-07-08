@@ -14,6 +14,11 @@ type NeuralImageShape struct {
 	BatchSize int
 }
 
+// NewNeuralImageShape : imageShapeのインスタンスを取得
+func NewNeuralImageShape(width, height, channel, batch int) NeuralImageShape {
+	return NeuralImageShape{Width: width, Height: height, Channel: channel, BatchSize: batch}
+}
+
 // Image : ニューラルネットワークでの画像データ（1チャンネル分）を格納する配列データ
 type Image [][]float64
 
