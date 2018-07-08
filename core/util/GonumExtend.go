@@ -86,17 +86,23 @@ func SumEachRow(x mat.Matrix) mat.Vector {
 }
 
 // MaxEachRow : 行列の各行について、最大値を選択し、ベクトルに変換する
+// また各最大値の列数を格納する
 // ex) 3*3の行列の場合、3*1のベクトルとなる
-func MaxEachRow(x mat.Matrix) mat.Vector {
-	r, c := x.Dims()
+// 一つ目の戻り値 : 各行の最大値を格納したベクトル
+// 二つ目の戻り値 : 各行の最大値の列数を格納した配列
+func MaxEachRow(x mat.Matrix) (mat.Vector, []int) {
+	r, _ := x.Dims()
 	vec := mat.NewVecDense(r, nil)
+	args := make([]int, 0, r)
+	dense := mat.DenseCopyOf(x)
 	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			tmpVal := vec.AtVec(i)
-			if tmpVal < x.At(i, j) {
-				vec.SetVec(i, x.At(i, j))
-			}
-		}
+		// 各行の最大値と該当する値の列数を取得する
+		rawRows := dense.RawRowView(i)
+		k, v := MaxValue(rawRows)
+
+		// 値を設定する
+		vec.SetVec(i, v)
+		args = append(args, k)
 	}
-	return vec
+	return vec, args
 }

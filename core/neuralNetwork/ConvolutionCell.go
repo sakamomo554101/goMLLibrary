@@ -121,6 +121,8 @@ type MaxPooling struct {
 
 	// input parameter
 	inputShape image.NeuralImageShape
+
+	maxArgs []int
 }
 
 func NewMaxPooling(inputShape image.NeuralImageShape, poolingW, poolingH int) *MaxPooling {
@@ -157,7 +159,8 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	img = util.Reshape(img, r, c)
 
 	// プーリング処理を行う
-	vec := util.MaxEachRow(img)
+	vec, maxArgs := util.MaxEachRow(img)
+	mp.maxArgs = maxArgs
 
 	// ベクトルを再度行列に直す
 	// 変換前 => ow * oh * Channel * N
