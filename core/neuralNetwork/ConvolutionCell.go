@@ -125,6 +125,7 @@ type MaxPooling struct {
 	maxArgs []int
 }
 
+// NewMaxPooling : MaxPooling層のインスタンスを取得
 func NewMaxPooling(inputShape image.NeuralImageShape, poolingW, poolingH int) *MaxPooling {
 	poolingShape := image.NewNeuralImageShape(poolingW, poolingH, 1, 1)
 	return &MaxPooling{poolingShape: poolingShape, inputShape: inputShape}
@@ -140,7 +141,7 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	// 画像を4次元からフィルタ演算をしやすいように2次元に変換
 	img, err := image.Im2col(iwcb, mp.poolingShape.Width, stride)
 	if err != nil {
-		panic("Convolution#Forward : forward処理に失敗しました. err = " + err.Error())
+		panic("Pooling#Forward : forward処理に失敗しました. err = " + err.Error())
 	}
 
 	// プーリングのサイズに合わせて、行列をreshapeする
@@ -148,11 +149,11 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	// 変換後 => row : ow * oh * Channel * N, col : poolingW * poolingH
 	ow, err := image.GetOutSize(mp.inputShape.Width, mp.poolingShape.Width, stride, padding)
 	if err != nil {
-		panic("Convolution#Forward : 出力幅の取得に失敗しました")
+		panic("Pooling#Forward : 出力幅の取得に失敗しました")
 	}
 	oh, err := image.GetOutSize(mp.inputShape.Height, mp.poolingShape.Height, stride, padding)
 	if err != nil {
-		panic("Convolution#Forward : 出力高の取得に失敗しました")
+		panic("Pooling#Forward : 出力高の取得に失敗しました")
 	}
 	r := ow * oh * iwcb.GetChannel() * iwcb.GetBatchCount()
 	c := mp.poolingShape.Width * mp.poolingShape.Height

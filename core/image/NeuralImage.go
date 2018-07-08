@@ -64,14 +64,16 @@ func (img Image) GetHeight() int {
 }
 
 // getIm2ColWindow : im2colで計算するために画像をカーネルサイズ×出力面積とする
+// 1次元数 : karnelSize * karnelSize
+// 2次元数 : ow * oh
 func (img Image) getIm2ColWindow(ow int, oh int, stride int, karnelSize int) [][]float64 {
 	window := make([][]float64, 0, ow*oh)
-	rowSize := karnelSize * karnelSize
-	for h := 0; h < oh; h += stride {
-		for w := 0; w < ow; w += stride {
-			row := make([]float64, 0, rowSize)
+	columnSize := karnelSize * karnelSize
+	for h := 0; h < img.GetHeight(); h += stride {
+		for w := 0; w < img.GetWidth(); w += stride {
+			row := make([]float64, 0, columnSize)
 			for k := 0; k < karnelSize; k++ {
-				row = append(row, img[h][w:w+karnelSize+1]...)
+				row = append(row, img[h][w:w+karnelSize]...)
 			}
 			window = append(window, row)
 		}
@@ -129,10 +131,12 @@ func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) [
 	for i := 0; i < ow*oh; i++ {
 		row := make([]float64, karnelSize*karnelSize*iwc.GetChennel())
 		for c := 0; c < iwc.GetChennel(); c++ {
-			row = append(row, iwc[c].getIm2ColWindow(ow, oh, stride, karnelSize)[i]...)
+			window := iwc[c].getIm2ColWindow(ow, oh, stride, karnelSize)
+			row = append(row, window[i]...)
 		}
 		col = append(col, row)
 	}
+
 	return col
 }
 
@@ -161,7 +165,7 @@ func NewImagesWithChannel(input []float64, w int, h int, c int, batch int, paddi
 }
 
 func NewImagesWithChannelFromMatrix(input mat.Matrix, w, h, c, padding int) ImagesWithChannel {
-	imageSize, batch := input.Dims()
+	batch, imageSize := input.Dims()
 	if imageSize != w*h*c {
 		panic("入力された画像データと指定した幅・高さ・チャネル数がマッチしてません")
 	}
