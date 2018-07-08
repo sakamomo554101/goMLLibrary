@@ -36,6 +36,15 @@ func TestMaxPooling_Forward(t *testing.T) {
 				r, c := out.Dims()
 				So(r, ShouldEqual, batch)
 				So(c, ShouldEqual, expectedW*expectedH*channel)
+
+				// 行列の値の確認
+				expectedOut := mat.NewDense(batch, expectedW*expectedH*channel, []float64{
+					// 1行目
+					4.5, 5.5, 6.5, 10.5, 11.5, 12.5, 16.5, 17.5, 18.5, 22.5, 23.5, 24.5, 28.5, 29.5, 30.5, 34.5, 35.5, 36.5,
+					// 2行目
+					40.5, 41.5, 42.5, 46.5, 47.5, 48.5, 52.5, 53.5, 54.5, 58.5, 59.5, 60.5, 64.5, 65.5, 66.5, 70.5, 71.5, 72.5,
+				})
+				So(mat.Equal(out, expectedOut), ShouldBeTrue)
 			})
 		})
 	})
