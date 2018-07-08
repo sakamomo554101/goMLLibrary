@@ -166,7 +166,7 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	// ベクトルを再度行列に直す
 	// 変換前 => ow * oh * Channel * N
 	// 変換後 => row : N, col : ow * oh * Channel
-	img = util.Reshape(vec, ow*oh*iwcb.GetChannel(), iwcb.GetBatchCount())
+	img = util.Reshape(vec, iwcb.GetBatchCount(), ow*oh*iwcb.GetChannel())
 	return img
 }
 

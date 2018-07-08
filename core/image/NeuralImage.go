@@ -73,7 +73,7 @@ func (img Image) getIm2ColWindow(ow int, oh int, stride int, karnelSize int) [][
 		for w := 0; w < img.GetWidth(); w += stride {
 			row := make([]float64, 0, columnSize)
 			for k := 0; k < karnelSize; k++ {
-				row = append(row, img[h][w:w+karnelSize]...)
+				row = append(row, img[h+k][w:w+karnelSize]...)
 			}
 			window = append(window, row)
 		}
@@ -129,7 +129,7 @@ func (iwc ImageWithChannel) im2Col(ow int, oh int, stride int, karnelSize int) [
 	// 行：ow*ohのサイズ
 	// 列：filterSize*filterSize*channelのサイズ
 	for i := 0; i < ow*oh; i++ {
-		row := make([]float64, karnelSize*karnelSize*iwc.GetChennel())
+		row := make([]float64, 0, karnelSize*karnelSize*iwc.GetChennel())
 		for c := 0; c < iwc.GetChennel(); c++ {
 			window := iwc[c].getIm2ColWindow(ow, oh, stride, karnelSize)
 			row = append(row, window[i]...)

@@ -29,7 +29,7 @@ func Im2col(input ImagesWithChannel, filterSize int, stride int) (mat.Matrix, er
 	for b, iwc := range input {
 		cols := iwc.im2Col(ow, oh, stride, filterSize)
 		for i, col := range cols {
-			dense.SetCol(b*ow*oh+i, col)
+			dense.SetRow(b*ow*oh+i, col)
 		}
 	}
 	return dense, nil
