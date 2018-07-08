@@ -52,3 +52,21 @@ func AddVecToMatrixCol(d *mat.Dense, vec mat.Vector) {
 		return vec.AtVec(j) + v
 	}, d)
 }
+
+// SumEachCol : 行列の各列について、合計値を計算し、ベクトルに変換する
+// ex) 3*3の行列の場合、1*3のベクトルとなる。
+// [1,1,1]
+// [2,2,2]
+// [3,3,3]
+// = [6,6,6]
+func SumEachCol(x *mat.Dense) mat.Vector {
+	r, c := x.Dims()
+	vec := mat.NewVecDense(c, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			tmpVal := vec.AtVec(j)
+			vec.SetVec(j, tmpVal+x.At(i, j))
+		}
+	}
+	return vec
+}
