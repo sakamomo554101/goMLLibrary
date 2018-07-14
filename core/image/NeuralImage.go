@@ -64,16 +64,16 @@ func (img Image) GetHeight() int {
 }
 
 // getIm2ColWindow : im2colで計算するために画像をカーネルサイズ×出力面積とする
-// 1次元数 : karnelSize * karnelSize
+// 1次元数 : filterSize * filterSize
 // 2次元数 : ow * oh
-func (img Image) getIm2ColWindow(ow int, oh int, stride int, karnelSize int) [][]float64 {
+func (img Image) getIm2ColWindow(ow int, oh int, stride int, filterSize int) [][]float64 {
 	window := make([][]float64, 0, ow*oh)
-	columnSize := karnelSize * karnelSize
-	for h := 0; h < img.GetHeight(); h += stride {
-		for w := 0; w < img.GetWidth(); w += stride {
+	columnSize := filterSize * filterSize
+	for h := 0; h <= img.GetHeight()-filterSize; h += stride {
+		for w := 0; w <= img.GetWidth()-filterSize; w += stride {
 			row := make([]float64, 0, columnSize)
-			for k := 0; k < karnelSize; k++ {
-				row = append(row, img[h+k][w:w+karnelSize]...)
+			for k := 0; k < filterSize; k++ {
+				row = append(row, img[h+k][w:w+filterSize]...)
 			}
 			window = append(window, row)
 		}

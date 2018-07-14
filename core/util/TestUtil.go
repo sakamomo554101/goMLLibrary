@@ -9,3 +9,12 @@ func CreateFloatArrayByStep(count int, firstValue float64, stepValue float64) []
 	}
 	return array
 }
+
+// CreateSameValueArray : floatの配列を作成（すべて同じ値）
+func CreateSameValueArray(count int, value float64) []float64 {
+	array := make([]float64, 0, count)
+	for i := 0; i < count; i++ {
+		array = append(array, value)
+	}
+	return array
+}

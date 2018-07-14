@@ -5,8 +5,89 @@ import (
 	"github.com/goMLLibrary/core/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"gonum.org/v1/gonum/mat"
+	"reflect"
 	"testing"
 )
+
+func TestConvolution_Forward(t *testing.T) {
+	Convey("Given : Convolution層を作成", t, func() {
+		Convey("AND : 入力の形（幅×高さ×チャネル)を3*3*2とし、バッチ数を2とする", nil)
+		width := 3
+		height := 3
+		channel := 2
+		batch := 2
+		inputShape := image.NewNeuralImageShape(width, height, channel, batch)
+
+		Convey("AND : フィルタの形（幅×高さ×チャネル)を2*2*3とする", nil)
+		filterShape := image.NewNeuralImageShape(2, 2, 3, 1)
+
+		Convey("AND : paddingが0, strideを1で畳み込み層を作成する", nil)
+		stride := 1
+		padding := 0
+		con := NewConvolution(stride, padding, inputShape, filterShape)
+
+		Convey("AND : 畳み込み層の重み（フィルタ）を1CH目を各値1、2CH目を各値2、3CH目を各値-1とする", nil)
+		r := filterShape.Width * filterShape.Height * inputShape.Channel
+		c := filterShape.Channel
+		w := mat.NewDense(r, c, []float64{
+			// 1CH
+			1, 1, 1, 1, -1, -1, -1, -1,
+			// 2CH
+			2, 2, 2, 2, 1, 1, 1, 1,
+			// 3CH
+			-1, -1, -1, -1, 2, 2, 2, 2,
+		})
+		Convey("Then : フィルタの行と列数が想定通りであること", func() {
+			actualRowSize, actualColSize := con.w.Dims()
+			So(actualRowSize, ShouldEqual, r)
+			So(actualColSize, ShouldEqual, c)
+		})
+		con.w = w
+
+		Convey("AND : 入力する行列を作成する", nil)
+		r = batch
+		c = width * height * channel
+		input := mat.NewDense(r, c, util.CreateFloatArrayByStep(width*height*channel*batch, 1.0, 1.0))
+
+		Convey("When : 畳み込み層に入力用の行列に対し、Forward処理を実施する", func() {
+			out := con.Forward(input)
+
+			Convey("Then : 出力された行列のサイズ(2*12)が意図通りであること", func() {
+				r, c := out.Dims()
+				expectedRow := batch
+				expectedOH := (height+2*padding-filterShape.Height)/stride + 1
+				expectedOW := (width+2*padding-filterShape.Width)/stride + 1
+				expectedCol := expectedOW * expectedOH * filterShape.Channel
+				So(expectedRow, ShouldEqual, r)
+				So(expectedCol, ShouldEqual, c)
+
+				Convey("AND : 演算結果の行列の中身が正しいこと", nil)
+				values := make([]float64, 0, r*c)
+				base1ch1 := []float64{12, 16, 24, 28}
+				base1ch2 := []float64{48, 52, 60, 64}
+				base2ch1 := []float64{84, 88, 96, 100}
+				base2ch2 := []float64{120, 124, 132, 136}
+
+				// 1枚目 1filter(1, 1, 1, 1, -1, -1, -1, -1)
+				// 1枚目 2filter(2, 2, 2, 2, 1, 1, 1, 1)
+				// 1枚目 3filter(-1, -1, -1, -1, 2, 2, 2, 2)
+				values = append(values, util.AddArray(base1ch1, util.ScaleArray(base1ch2, -1))...)
+				values = append(values, util.AddArray(util.ScaleArray(base1ch1, 2), base1ch2)...)
+				values = append(values, util.AddArray(util.ScaleArray(base1ch1, -1), util.ScaleArray(base1ch2, 2))...)
+
+				// 2枚目 1filter(1, 1, 1, 1, -1, -1, -1, -1)
+				// 2枚目 2filter(2, 2, 2, 2, 1, 1, 1, 1)
+				// 2枚目 3filter(-1, -1, -1, -1, 2, 2, 2, 2)
+				values = append(values, util.AddArray(base2ch1, util.ScaleArray(base2ch2, -1))...)
+				values = append(values, util.AddArray(util.ScaleArray(base2ch1, 2), base2ch2)...)
+				values = append(values, util.AddArray(util.ScaleArray(base2ch1, -1), util.ScaleArray(base2ch2, 2))...)
+
+				expectedOut := mat.NewDense(expectedRow, expectedCol, values)
+				So(reflect.DeepEqual(out, expectedOut), ShouldBeTrue)
+			})
+		})
+	})
+}
 
 func TestMaxPooling_Forward(t *testing.T) {
 	Convey("Given : MaxPooling層を作成", t, func() {
