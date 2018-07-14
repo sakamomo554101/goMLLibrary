@@ -30,12 +30,15 @@ func TestConvolution_Forward(t *testing.T) {
 		r := filterShape.Width * filterShape.Height * inputShape.Channel
 		c := filterShape.Channel
 		w := mat.NewDense(r, c, []float64{
-			// 1CH
-			1, 1, 1, 1, -1, -1, -1, -1,
-			// 2CH
-			2, 2, 2, 2, 1, 1, 1, 1,
-			// 3CH
-			-1, -1, -1, -1, 2, 2, 2, 2,
+			// 1CH // 2CH // 3CH
+			1, 2, -1,
+			1, 2, -1,
+			1, 2, -1,
+			1, 2, -1,
+			-1, 1, 2,
+			-1, 1, 2,
+			-1, 1, 2,
+			-1, 1, 2,
 		})
 		Convey("Then : フィルタの行と列数が想定通りであること", func() {
 			actualRowSize, actualColSize := con.w.Dims()
@@ -43,6 +46,9 @@ func TestConvolution_Forward(t *testing.T) {
 			So(actualColSize, ShouldEqual, c)
 		})
 		con.w = w
+
+		Convey("AND : バイアスは0とする", nil)
+		con.b = mat.NewVecDense(filterShape.Channel, nil)
 
 		Convey("AND : 入力する行列を作成する", nil)
 		r = batch

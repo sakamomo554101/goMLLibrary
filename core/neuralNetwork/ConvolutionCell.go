@@ -188,6 +188,26 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	return img
 }
 
+/*func ReshapeFromIm2ColMatrix(img mat.Matrix) mat.Matrix {
+	// 各列が各チャネルの出力データとなるため、列データを取得する
+	dense := mat.DenseCopyOf(img)
+	rawData := make([]float64, 0, r*c)
+	for index := 0; index < iwcb.GetBatchCount(); index++ {
+		// 各列はchannel毎のow * oh * Nの形なため、
+		// 各データ分だけ、入れ替える
+		for j := 0; j < iwcb.GetChannel(); j++ {
+			col := dense.ColView(j)
+			vec := mat.VecDenseCopyOf(col)
+			rawData = append(rawData, vec.RawVector().Data[index*ow*oh:(index+1)*ow*oh]...)
+		}
+	}
+
+	// float64の配列を出力する行列に変換する
+	// 変換前 => ow * oh * Channel * N
+	// 変換後 => row : N, col : ow * oh * Channel
+	return mat.NewDense(iwcb.GetBatchCount(), ow*oh*iwcb.GetChannel(), rawData)
+}*/
+
 func (mp *MaxPooling) Backward(dout mat.Matrix) mat.Matrix {
 	return nil
 }
