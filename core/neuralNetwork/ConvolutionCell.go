@@ -70,7 +70,7 @@ func (con *Convolution) Forward(x mat.Matrix) mat.Matrix {
 	if err != nil {
 		panic("Convolution#Forward : 出力高の取得に失敗しました")
 	}
-	return util.Reshape(dense, con.inputShape.BatchSize, ow*oh*con.filterShape.Channel)
+	return reshapeFromIm2ColMatrix(dense, iwcb.GetBatchCount(), con.filterShape.Channel, ow, oh)
 }
 
 func (con *Convolution) Backward(dout mat.Matrix) mat.Matrix {
@@ -169,44 +169,31 @@ func (mp *MaxPooling) Forward(x mat.Matrix) mat.Matrix {
 	img = util.Reshape(vec, ow*oh*iwcb.GetBatchCount(), iwcb.GetChannel())
 
 	// 各列が各チャネルの出力データとなるため、列データを取得する
-	dense := mat.DenseCopyOf(img)
-	rawData := make([]float64, 0, r*c)
-	for index := 0; index < iwcb.GetBatchCount(); index++ {
-		// 各列はchannel毎のow * oh * Nの形なため、
-		// 各データ分だけ、入れ替える
-		for j := 0; j < iwcb.GetChannel(); j++ {
-			col := dense.ColView(j)
-			vec := mat.VecDenseCopyOf(col)
-			rawData = append(rawData, vec.RawVector().Data[index*ow*oh:(index+1)*ow*oh]...)
-		}
-	}
-
-	// float64の配列を出力する行列に変換する
-	// 変換前 => ow * oh * Channel * N
-	// 変換後 => row : N, col : ow * oh * Channel
-	img = mat.NewDense(iwcb.GetBatchCount(), ow*oh*iwcb.GetChannel(), rawData)
-	return img
+	return reshapeFromIm2ColMatrix(img, iwcb.GetBatchCount(), iwcb.GetChannel(), ow, oh)
 }
 
-/*func ReshapeFromIm2ColMatrix(img mat.Matrix) mat.Matrix {
+// reshapeFromIm2ColMatrix : im2colから内積を実施した行列を元の画像形式の行列に戻す処理
+func reshapeFromIm2ColMatrix(img mat.Matrix, batch, outputChannel, outputWidth, outputHeight int) mat.Matrix {
 	// 各列が各チャネルの出力データとなるため、列データを取得する
 	dense := mat.DenseCopyOf(img)
+	r, c := img.Dims()
 	rawData := make([]float64, 0, r*c)
-	for index := 0; index < iwcb.GetBatchCount(); index++ {
+	outputAreaSize := outputWidth * outputHeight
+	for index := 0; index < batch; index++ {
 		// 各列はchannel毎のow * oh * Nの形なため、
-		// 各データ分だけ、入れ替える
-		for j := 0; j < iwcb.GetChannel(); j++ {
+		// 各データ分だけ入れ替える
+		for j := 0; j < outputChannel; j++ {
 			col := dense.ColView(j)
 			vec := mat.VecDenseCopyOf(col)
-			rawData = append(rawData, vec.RawVector().Data[index*ow*oh:(index+1)*ow*oh]...)
+			rawData = append(rawData, vec.RawVector().Data[index*outputAreaSize:(index+1)*outputAreaSize]...)
 		}
 	}
 
 	// float64の配列を出力する行列に変換する
 	// 変換前 => ow * oh * Channel * N
 	// 変換後 => row : N, col : ow * oh * Channel
-	return mat.NewDense(iwcb.GetBatchCount(), ow*oh*iwcb.GetChannel(), rawData)
-}*/
+	return mat.NewDense(batch, outputAreaSize*outputChannel, rawData)
+}
 
 func (mp *MaxPooling) Backward(dout mat.Matrix) mat.Matrix {
 	return nil
