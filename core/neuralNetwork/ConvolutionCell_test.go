@@ -95,6 +95,70 @@ func TestConvolution_Forward(t *testing.T) {
 	})
 }
 
+func TestConvolution_Backward(t *testing.T) {
+	Convey("Given : 畳み込み層を作成", t, func() {
+		Convey("AND : 入力の形（幅×高さ×チャネル)を3*3*2とし、バッチ数を2とする", nil)
+		width := 3
+		height := 3
+		channel := 2
+		batch := 2
+		inputShape := image.NewNeuralImageShape(width, height, channel, batch)
+
+		Convey("AND : フィルタの形（幅×高さ×チャネル)を2*2*3とする", nil)
+		filterShape := image.NewNeuralImageShape(2, 2, 3, 1)
+
+		Convey("AND : paddingが0, strideを1で畳み込み層を作成する", nil)
+		stride := 1
+		padding := 0
+		con := NewConvolution(stride, padding, inputShape, filterShape)
+
+		Convey("AND : 畳み込み層の重み（フィルタ）を1CH目を各値1、2CH目を各値2、3CH目を各値-1とする", nil)
+		r := filterShape.Width * filterShape.Height * inputShape.Channel
+		c := filterShape.Channel
+		w := mat.NewDense(r, c, []float64{
+			// 1CH // 2CH // 3CH
+			1, 2, -1,
+			1, 2, -1,
+			1, 2, -1,
+			1, 2, -1,
+			-1, 1, 2,
+			-1, 1, 2,
+			-1, 1, 2,
+			-1, 1, 2,
+		})
+		con.w = w
+
+		Convey("AND : バイアスは0とする", nil)
+		con.b = mat.NewVecDense(filterShape.Channel, nil)
+
+		Convey("AND : 入力する行列を作成し、畳み込み層の入力値として設定する", nil)
+		r = batch
+		c = width * height * channel
+		con.x = mat.NewDense(r, c, util.CreateFloatArrayByStep(r*c, 1.0, 1.0))
+
+		Convey("AND : 誤差行列（dout）を作成する(幅×高さ×チャネルが2*2*3で、バッチ数が2となる)", nil)
+		r = batch
+		c = 2 * 2 * 3
+		dout := mat.NewDense(r, c, []float64{
+			// 1データ目
+			1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+			// 2データ目
+			4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6,
+		})
+
+		Convey("When : Backward処理を実施する", func() {
+			dx := con.Backward(dout)
+
+			Convey("Then : 出力される行列サイズが意図通りであること", func() {
+				r, c := dx.Dims()
+				So(r, ShouldEqual, 2)
+				So(c, ShouldEqual, 3*3*2)
+			})
+		})
+
+	})
+}
+
 func TestMaxPooling_Forward(t *testing.T) {
 	Convey("Given : MaxPooling層を作成", t, func() {
 		Convey("AND : 入力の形（幅×高さ×チャネル）を6*6*2とし、バッチ数は2とする", nil)
