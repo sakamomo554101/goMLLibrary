@@ -1,5 +1,0 @@
-package: github.com/goMLLibrary
-import:
-- package: github.com/gonum/gonum
-  subpackages:
-    - matrix
