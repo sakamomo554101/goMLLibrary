@@ -108,6 +108,7 @@ func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	return dense
 }
 
+// SoftmaxWithLoss : 損失関数として、softmax+交差エントロピー誤差の素子を取得
 type SoftmaxWithLoss struct {
 	out  mat.Matrix
 	t    mat.Matrix
