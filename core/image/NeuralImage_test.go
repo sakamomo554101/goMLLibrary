@@ -1,4 +1,4 @@
-package neuralNetwork
+package image
 
 import (
 	"github.com/goMLLibrary/core/util"
@@ -13,12 +13,31 @@ func TestNewImage(t *testing.T) {
 		h := 4
 		input := util.CreateFloatArrayByStep(w*h, 0, 1)
 		Convey("When : Imageを作成する", func() {
-			image := NewImage(input, w, h)
+			image := NewImage(input, w, h, 0)
 			Convey("Then : 3*4の2次元配列データが出来ていること", func() {
 				So(h, ShouldEqual, len(image))
 				for i := 0; i < h; i++ {
 					So(w, ShouldEqual, len(image[i]))
 					So(reflect.DeepEqual(image[i], util.CreateFloatArrayByStep(w, float64(i*w), 1)), ShouldBeTrue)
+				}
+			})
+		})
+
+		Convey("When : padding:1を指定して、Imageを作成する", func() {
+			padding := 1
+			image := NewImage(input, w, h, padding)
+			Convey("Then : 5*6の2次元配列データが出来ていること", func() {
+				So(h+padding*2, ShouldEqual, len(image))
+				for i := 0; i < h; i++ {
+					So(w+padding*2, ShouldEqual, len(image[i]))
+					if i < padding || i >= w+padding {
+						// パディング箇所
+						So(reflect.DeepEqual(image[i], make([]float64, w+padding*2, w+padding*2)), ShouldBeTrue)
+					} else {
+						// パディングではない箇所
+						expectedRow := []float64{0, float64((i - padding) * w), float64((i-padding)*w) + 1.0, float64((i-padding)*w) + 2.0, 0}
+						So(reflect.DeepEqual(image[i], expectedRow), ShouldBeTrue)
+					}
 				}
 			})
 		})
@@ -32,7 +51,7 @@ func TestNewImageWithChannel(t *testing.T) {
 		c := 3
 		input := util.CreateFloatArrayByStep(w*h*c, 0, 1)
 		Convey("When : ImageWithChannelを作成する", func() {
-			imageWithChannel := NewImageWithChannel(input, w, h, c)
+			imageWithChannel := NewImageWithChannel(input, w, h, c, 0)
 			Convey("Then : 3*4*3の3次元配列データが出来ていること", func() {
 				So(c, ShouldEqual, len(imageWithChannel))
 				for i := 0; i < c; i++ {
@@ -55,7 +74,7 @@ func TestNewImagesWithChannel(t *testing.T) {
 		batch := 2
 		input := util.CreateFloatArrayByStep(w*h*c*batch, 0, 1)
 		Convey("When : ImagesWithChannelを作成する", func() {
-			imagesWithChannel := NewImagesWithChannel(input, w, h, c, batch)
+			imagesWithChannel := NewImagesWithChannel(input, w, h, c, batch, 0)
 			Convey("Then : 3*4*3*2の4次元配列データが出来ていること", func() {
 				So(batch, ShouldEqual, len(imagesWithChannel))
 				for i := 0; i < batch; i++ {
