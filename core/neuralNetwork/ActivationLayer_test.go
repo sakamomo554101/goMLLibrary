@@ -1,11 +1,12 @@
 package neuralNetwork
 
 import (
+	"math"
+	"testing"
+
 	"github.com/goMLLibrary/core/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"gonum.org/v1/gonum/mat"
-	"math"
-	"testing"
 )
 
 func TestSigmoid(t *testing.T) {
