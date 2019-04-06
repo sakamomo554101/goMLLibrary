@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goMLLibrary/core/util"
+	"github.com/kurama554101/goMLLibrary/core/util"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

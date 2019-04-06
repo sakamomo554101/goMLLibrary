@@ -3,7 +3,7 @@ package neuralNetwork
 import (
 	"math"
 
-	"github.com/goMLLibrary/core/util"
+	"github.com/kurama554101/goMLLibrary/core/util"
 	"gonum.org/v1/gonum/mat"
 )
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/goMLLibrary/core/graph"
-	"github.com/goMLLibrary/core/mnist"
-	"github.com/goMLLibrary/core/neuralNetwork"
+	"github.com/kurama554101/goMLLibrary/core/graph"
+	"github.com/kurama554101/goMLLibrary/core/mnist"
+	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
 )
 
 func main() {
