@@ -6,16 +6,12 @@ Go言語でニューラルネットワークに関連したコンポーネント
 
 ## 環境
 
-* Go 1.10
+* Go 1.12
 
 ## Build&Run
 
 ```Sh
-// 必要なOSSをインストールする
-$ make dep
-
-// Mnistのサンプルコードを動かす
-$ make build-sample
+$ go run ./main/MnistSample.go
 ```
 ## 実装したレイヤー
 

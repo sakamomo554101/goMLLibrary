@@ -2,10 +2,11 @@ package mnist
 
 import (
 	"fmt"
-	"github.com/petar/GoMNIST"
 	"image/color"
 	"os"
 	"testing"
+
+	"github.com/petar/GoMNIST"
 )
 
 func TestMnistLoad(t *testing.T) {

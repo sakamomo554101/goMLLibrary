@@ -1,12 +1,13 @@
 package mnist
 
 import (
-	"github.com/goMLLibrary/core/util"
-	"github.com/petar/GoMNIST"
-	"gonum.org/v1/gonum/mat"
 	"image"
 	"image/color"
 	"os"
+
+	"github.com/kurama554101/goMLLibrary/core/util"
+	"github.com/petar/GoMNIST"
+	"gonum.org/v1/gonum/mat"
 )
 
 // LoadData : Mnistのデータセットを取得

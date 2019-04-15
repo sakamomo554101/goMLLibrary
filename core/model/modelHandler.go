@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"github.com/goMLLibrary/core/neuralNetwork"
-	"gonum.org/v1/gonum/mat"
 	"io/ioutil"
+
+	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
+	"gonum.org/v1/gonum/mat"
 )
 
 // WriteNNLayers : ニューラルネットワークの情報をファイルに書き出す

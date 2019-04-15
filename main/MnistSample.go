@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/goMLLibrary/core/graph"
-	"github.com/goMLLibrary/core/mnist"
-	"github.com/goMLLibrary/core/neuralNetwork"
 	"os"
+
+	"github.com/kurama554101/goMLLibrary/core/graph"
+	"github.com/kurama554101/goMLLibrary/core/mnist"
+	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
 )
 
 func main() {

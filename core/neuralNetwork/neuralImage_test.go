@@ -1,10 +1,11 @@
 package neuralNetwork
 
 import (
-	"github.com/goMLLibrary/core/util"
-	. "github.com/smartystreets/goconvey/convey"
 	"reflect"
 	"testing"
+
+	"github.com/kurama554101/goMLLibrary/core/util"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestNewImage(t *testing.T) {

@@ -1,13 +1,14 @@
 package model
 
 import (
-	"github.com/goMLLibrary/core/neuralNetwork"
-	"github.com/goMLLibrary/core/util"
-	. "github.com/smartystreets/goconvey/convey"
-	"gonum.org/v1/gonum/mat"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
+	"github.com/kurama554101/goMLLibrary/core/util"
+	. "github.com/smartystreets/goconvey/convey"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestModelHandler(t *testing.T) {
