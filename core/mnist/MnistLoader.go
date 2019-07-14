@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"os"
 
-	"github.com/kurama554101/goMLLibrary/core/util"
+	"github.com/goMLLibrary/core/util"
 	"github.com/petar/GoMNIST"
 	"gonum.org/v1/gonum/mat"
 )
@@ -128,5 +128,6 @@ func (data *MnistData) GetLabelVector() mat.Vector {
 
 func getDataSetPath() string {
 	gopath := os.Getenv("GOPATH")
-	return gopath + "/src/github.com/petar/GoMNIST/data"
+	// TODO : 暫定的にパスを直接指定
+	return gopath + "/src/github.com/kurama554101/goMLLibrary/vendor/petar/GoMNIST/data"
 }

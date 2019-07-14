@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kurama554101/goMLLibrary/core/graph"
-	"github.com/kurama554101/goMLLibrary/core/mnist"
-	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
+	"github.com/goMLLibrary/core/graph"
+	"github.com/goMLLibrary/core/mnist"
+	"github.com/goMLLibrary/core/neuralNetwork"
 )
 
 func main() {
@@ -27,6 +27,7 @@ func main() {
 	// MNISTのデータセットを取得
 	train, test, err := mnist.LoadData()
 	if err != nil {
+		fmt.Printf("Can't get mnist train and test data! \n")
 		os.Exit(-1)
 	}
 
