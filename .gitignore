@@ -30,5 +30,12 @@ Gopkg.lock
 # ignore data folder
 data/
 
-# ignore out folder
-out/
+# ignore gotvm
+gotvm/
+
+# ignore model and output folder
+model/
+output/
+
+# ignore pychache file
+__pycache__/
