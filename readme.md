@@ -79,6 +79,7 @@ $ cd ../
 ### Build sample code
 
 ```bash
+$ export GOPATH=/home/development/go
 $ bash build_tvm_sample.sh
 ```
 
