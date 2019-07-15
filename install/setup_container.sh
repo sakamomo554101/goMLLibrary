@@ -6,6 +6,7 @@ WORKDIR=/home/development
 echo GOROOT=/usr/local/go >> ~/.bash_profile
 echo GOPATH=$WORKDIR/go >> ~/.bash_profile
 echo PATH=\$GOPATH/bin:\$GOROOT/bin:\$PATH >> ~/.bash_profile
+echo GO111MODULE=on >> ~/.bash_profile
 source ~/.bash_profile
 
 # build gotvm
@@ -19,4 +20,4 @@ GOTVM_PATH=$GOML_PATH/core/tvm_wrapper/gotvm.a
 if [ -e $GOTVM_PATH ]; then
     rm -r $GOTVM_PATH
 fi
-mv $WORKDIR/tvm/golang/gopath/src/gotvm/gotvm.a $GOML_PATH
+mv $WORKDIR/tvm/golang/gopath/src/gotvm/gotvm.a $GOML_PATH/core/tvm_wrapper
