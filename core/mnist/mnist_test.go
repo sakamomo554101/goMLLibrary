@@ -10,8 +10,8 @@ import (
 )
 
 func TestMnistLoad(t *testing.T) {
-	gopath := os.Getenv("GOPATH")
-	train, _, err := GoMNIST.Load(gopath + "/src/github.com/petar/GoMNIST/data")
+	os.Mkdir("data", 0777)
+	train, _, err := GoMNIST.Load("data")
 	if err != nil {
 		t.Fatalf("can't load mnist data! error detail is " + err.Error())
 	}
