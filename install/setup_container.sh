@@ -6,7 +6,7 @@ WORKDIR=/home/development
 echo GOROOT=/usr/local/go >> ~/.bash_profile
 echo GOPATH=$WORKDIR/go >> ~/.bash_profile
 echo PATH=\$GOPATH/bin:\$GOROOT/bin:\$PATH >> ~/.bash_profile
-echo GO111MODULE=on >> ~/.bash_profile
+echo export GO111MODULE=on >> ~/.bash_profile
 source ~/.bash_profile
 
 # build gotvm
