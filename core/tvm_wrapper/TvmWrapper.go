@@ -121,7 +121,7 @@ func (wrapper *TvmWrapper) LoadModel(modelParam *ModelParam) (*moduleInfo, error
 		return nil, err
 	}
 	modJsonStr := string(bytes)
-	d
+
 	// create graph module of tvm
 	fmt.Print("start to create graph module of tvm...\n")
 	funcp, err := gotvm.GetGlobalFunction("tvm.graph_runtime.create")
@@ -169,6 +169,7 @@ func (wrapper *TvmWrapper) LoadModel(modelParam *ModelParam) (*moduleInfo, error
 func (wrapper *TvmWrapper) Infer(moduleInfo *moduleInfo, input []float32) ([]float32, error) {
 	defer runtime.GC()
 	graphmod := moduleInfo.graphModule
+	inputShape := moduleInfo.inputShape
 	outputShape := moduleInfo.outputShape
 
 	// set input
@@ -177,7 +178,14 @@ func (wrapper *TvmWrapper) Infer(moduleInfo *moduleInfo, input []float32) ([]flo
 		fmt.Print(err.Error())
 		return nil, err
 	}
-	_, err = funcp.Invoke("input", input)
+	// TODO : use device type
+	inputForTvm, err := gotvm.Empty(inputShape, "float32", gotvm.CPU(0))
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	inputForTvm.CopyFrom(input)
+	_, err = funcp.Invoke("input", inputForTvm)
 	if err != nil {
 		fmt.Print(err.Error())
 		return nil, err
