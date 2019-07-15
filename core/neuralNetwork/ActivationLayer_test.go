@@ -120,7 +120,6 @@ func TestTanh(t *testing.T) {
 	})
 }
 
-// TODO : テストがこけるため要修正（テスト側の修正が必要）
 func TestSoftmaxCrossEntropy(t *testing.T) {
 	Convey("Given : SoftmaxCrossEntropyレイヤーが一つ与えられた時", t, func() {
 		sce := NewSoftmaxWithLoss()
@@ -219,11 +218,10 @@ func softmaxCrossEntropy_backward(out mat.Matrix, t mat.Matrix) mat.Matrix {
 		panic("softmatCrossEntropy_backward argument is not match!")
 	}
 
-	dense := mat.NewDense(1, cout, nil)
+	dense := mat.NewDense(rout, cout, nil)
 	for i := 0; i < rout; i++ {
 		vs := softmaxCrossEntropy_backward_1batch(mat.DenseCopyOf(out).RawRowView(i), mat.DenseCopyOf(t).RawRowView(i), rout)
-		tmpDense := mat.NewDense(1, cout, vs)
-		dense.Add(dense, tmpDense)
+		dense.SetRow(i, vs)
 	}
 	return dense
 }
