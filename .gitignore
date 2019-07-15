@@ -26,3 +26,9 @@ glide.lock
 
 # ignore dep lock file
 Gopkg.lock
+
+# ignore data folder
+data/
+
+# ignore out folder
+out/

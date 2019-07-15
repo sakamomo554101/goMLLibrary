@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
+	"github.com/goMLLibrary/core/neuralNetwork"
 	"gonum.org/v1/gonum/mat"
 )
 

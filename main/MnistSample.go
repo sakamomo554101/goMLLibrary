@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kurama554101/goMLLibrary/core/graph"
-	"github.com/kurama554101/goMLLibrary/core/mnist"
-	"github.com/kurama554101/goMLLibrary/core/neuralNetwork"
+	"github.com/goMLLibrary/core/graph"
+	"github.com/goMLLibrary/core/mnist"
+	"github.com/goMLLibrary/core/neuralNetwork"
 )
 
 func main() {
@@ -24,9 +24,13 @@ func main() {
 	// 3層目
 	layers.Add(neuralNetwork.NewAffine(1000, 10))
 
+	// MNISTデータセットを格納するためのフォルダを作成
+	os.Mkdir("data", 0777)
+
 	// MNISTのデータセットを取得
-	train, test, err := mnist.LoadData()
+	train, test, err := mnist.LoadData("data")
 	if err != nil {
+		fmt.Printf("Can't get mnist train and test data! \n")
 		os.Exit(-1)
 	}
 

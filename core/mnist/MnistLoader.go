@@ -1,20 +1,31 @@
 package mnist
 
 import (
+	"fmt"
 	"image"
 	"image/color"
-	"os"
+	"path"
 
-	"github.com/kurama554101/goMLLibrary/core/util"
-	"github.com/petar/GoMNIST"
+	"github.com/goMLLibrary/core/util"
 	"gonum.org/v1/gonum/mat"
+	"github.com/petar/GoMNIST"
 )
 
+var downloadMaps = map[string]string {
+	"train-images-idx3-ubyte.gz": "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+	"train-labels-idx1-ubyte.gz": "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
+	"t10k-images-idx3-ubyte.gz": "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+	"t10k-labels-idx1-ubyte.gz": "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
+}
+
 // LoadData : Mnistのデータセットを取得
-func LoadData() (trainSet *MnistDataSet, testSet *MnistDataSet, err error) {
+func LoadData(rootPath string) (trainSet *MnistDataSet, testSet *MnistDataSet, err error) {
+	// mnistデータがなければ、ダウンロードする
+	downloadMnistDataIfNeeded(rootPath)
+
 	// train : Mnistの学習用データ
 	// test : Mnistのテスト用データ
-	train, test, err := GoMNIST.Load(getDataSetPath())
+	train, test, err := GoMNIST.Load(rootPath)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -126,7 +137,19 @@ func (data *MnistData) GetLabelVector() mat.Vector {
 	return vec
 }
 
-func getDataSetPath() string {
-	gopath := os.Getenv("GOPATH")
-	return gopath + "/src/github.com/petar/GoMNIST/data"
+func downloadMnistDataIfNeeded(rootPath string) error {
+	// download mnist files
+	for key, v := range downloadMaps {
+		filePath := path.Join(rootPath, key)
+
+		// if mnist file is not found, download it.
+		if !util.Exists(filePath) {
+			err := util.DownloadFile(filePath, v)
+			if err != nil {
+				fmt.Printf("%s \n", err.Error())
+				return err
+			}
+		}
+	}
+	return nil
 }
