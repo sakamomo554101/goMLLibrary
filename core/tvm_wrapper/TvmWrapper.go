@@ -121,7 +121,7 @@ func (wrapper *TvmWrapper) LoadModel(modelParam *ModelParam) (*moduleInfo, error
 		return nil, err
 	}
 	modJsonStr := string(bytes)
-
+	d
 	// create graph module of tvm
 	fmt.Print("start to create graph module of tvm...\n")
 	funcp, err := gotvm.GetGlobalFunction("tvm.graph_runtime.create")

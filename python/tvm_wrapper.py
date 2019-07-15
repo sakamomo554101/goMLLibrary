@@ -61,7 +61,7 @@ class TvmWrapper:
         graph_name = model_name + ".json"
         graph_json = graph.json()
         with open(os.path.join(self.__param.output_folder, graph_name), "w") as f:
-            json.dump(graph_json, f, indent=4)
+            f.write(graph_json)
 
         # パラメーター情報をファイルに書き出す
         param_name = model_name + ".params"
