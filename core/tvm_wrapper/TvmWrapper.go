@@ -7,12 +7,12 @@ import (
 	"./gotvm"
 )
 
-// TvmConfig : xxxx
+// TvmConfig : TVM Module Configuration
 type TvmConfig struct {
 	DeviceType int64
 }
 
-// NewTvmConfig : xxxx
+// NewTvmConfig : Create Object of TvmConfig
 func NewTvmConfig() *TvmConfig {
 	config := TvmConfig{}
 	config.DeviceType = (int64)(gotvm.KDLCPU)
@@ -65,19 +65,19 @@ func (param *ModelParam) DebugStr() string {
 	return debugStr
 }
 
-// TvmWrapper : xxxx
+// TvmWrapper : TVM wrapper struct to use TVM function
 type TvmWrapper struct {
 	funcNames []string
 	config TvmConfig
 }
 
-// NewTvmWrapper : xxxx
+// NewTvmWrapper : Create TVM wrapper object
 func NewTvmWrapper() *TvmWrapper {
 	wrapper := TvmWrapper{}
 	return &wrapper
 }
 
-// Initialize : xxxx
+// Initialize : Initialize TVM wrapper struct to use it
 func (wrapper *TvmWrapper) Initialize(config TvmConfig) error {
 	defer runtime.GC()
 
@@ -98,7 +98,7 @@ func (wrapper *TvmWrapper) Initialize(config TvmConfig) error {
 	return nil
 }
 
-// LoadModel : xxxx
+// LoadModel : Load specified model to get inference model
 func (wrapper *TvmWrapper) LoadModel(modelParam *ModelParam) (*moduleInfo, error) {
 	defer runtime.GC()
 
@@ -165,7 +165,7 @@ func (wrapper *TvmWrapper) LoadModel(modelParam *ModelParam) (*moduleInfo, error
 	return info, nil
 }
 
-// Infer : xxxx
+// Infer : Infer the output data from input
 func (wrapper *TvmWrapper) Infer(moduleInfo *moduleInfo, input []float32) ([]float32, error) {
 	defer runtime.GC()
 	graphmod := moduleInfo.graphModule
