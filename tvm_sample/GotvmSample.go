@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"./tvm_wrapper"
+	"fmt"
 	"math/rand"
 	"os"
 	"path"

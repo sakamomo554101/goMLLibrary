@@ -1,10 +1,10 @@
 package tvm_wrapper
 
 import (
+	"./gotvm"
 	"fmt"
 	"io/ioutil"
 	"runtime"
-	"./gotvm"
 )
 
 // TvmConfig : TVM Module Configuration
@@ -21,7 +21,7 @@ func NewTvmConfig() *TvmConfig {
 
 type moduleInfo struct {
 	graphModule *gotvm.Module
-	inputShape []int64
+	inputShape  []int64
 	outputShape []int64
 }
 
@@ -68,7 +68,7 @@ func (param *ModelParam) DebugStr() string {
 // TvmWrapper : TVM wrapper struct to use TVM function
 type TvmWrapper struct {
 	funcNames []string
-	config TvmConfig
+	config    TvmConfig
 }
 
 // NewTvmWrapper : Create TVM wrapper object
