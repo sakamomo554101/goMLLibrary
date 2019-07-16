@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    working_directory: /home/development/go/src/github.com/
+    docker:
+      - image: kurama554101/go-ml-library:0.1
+    steps:
+      - checkout # checkout goMLLibrary into working_directory
+      - run:
+          name: Execute Setup
+          command: |
+            bash install/setup_container
+            source ~/.bash_profile
+          working_directory: /home/development/go/src/github.com/goMLLibrary
