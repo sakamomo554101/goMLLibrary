@@ -11,4 +11,5 @@ jobs:
           command: |
             bash install/setup_container
             source ~/.bash_profile
+            echo "end setup"
           working_directory: /home/development/go/src/github.com/goMLLibrary
