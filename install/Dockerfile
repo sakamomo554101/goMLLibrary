@@ -54,9 +54,13 @@ RUN set -x && \
     mv go /usr/local && \
     rm go1.12.6.linux-amd64.tar.gz
 
+# setup golang environment parameter
+ENV GOPATH $WORKDIR/go
+
 # Install go packages
 RUN set -x && \
-    apt-get install -y golint
+    apt-get install -y golint && \
+    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.17.1
 
 # build nnvm/tvm module
 RUN set -x && \
