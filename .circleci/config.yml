@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: /home/development/go/src/github.com/
+    working_directory: /home/development/go/src/github.com/goMLLibrary
     docker:
       - image: kurama554101/go-ml-library:0.1
     steps:
