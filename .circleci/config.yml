@@ -9,7 +9,8 @@ jobs:
       - run:
           name: Execute Setup
           command: |
-            bash install/setup_container
+            pwd
+            bash install/setup_container.sh
             source ~/.bash_profile
             echo "end setup"
           working_directory: /home/development/go/src/github.com/goMLLibrary
