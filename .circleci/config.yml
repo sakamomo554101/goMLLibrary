@@ -10,6 +10,8 @@ jobs:
           name: Execute Setup
           command: |
             pwd
+            ls -l
+            ls -l install
             bash install/setup_container.sh
             source ~/.bash_profile
             echo "end setup"
