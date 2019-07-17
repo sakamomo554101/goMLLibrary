@@ -16,4 +16,4 @@ jobs:
           name: Execute Lint
           command: |
             source ~/.bash_profile
-            golangci-lint run core/*  -v --skip-dirs /home/development/go/src/github.com/goMLLibrary/core/tvm_wrapper
+            golangci-lint run core/*  -v --skip-dirs ./core/tvm_wrapper
