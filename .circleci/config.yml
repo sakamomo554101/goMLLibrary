@@ -18,4 +18,5 @@ jobs:
             source ~/.bash_profile
             ls -l core/tvm_wrapper
             go env
+            go mod download
             golangci-lint run core/*  -v --skip-dirs core/tvm_wrapper
