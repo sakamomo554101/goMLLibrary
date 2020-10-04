@@ -24,6 +24,14 @@ type NeuralNetworkLayer interface {
 	UpdateParams(map[string]mat.Matrix)
 }
 
+// LossLayer : 損失を出力する素子に関するIF
+type LossLayer interface {
+	// Forward : 順方向伝播の実施
+	Forward(x mat.Matrix, t mat.Matrix) (loss float64, accuracy float64)
+	// Backward : 逆方向伝播の実施
+	Backward() mat.Matrix
+}
+
 type Affine struct {
 	w  mat.Matrix
 	b  mat.Vector

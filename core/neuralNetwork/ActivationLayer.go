@@ -109,6 +109,7 @@ func (tanh *Tanh) Backward(dout mat.Matrix) mat.Matrix {
 	return dense
 }
 
+// SoftmaxWithLoss : 損失関数として、softmax+交差エントロピー誤差の素子を取得
 type SoftmaxWithLoss struct {
 	out  mat.Matrix
 	t    mat.Matrix
@@ -198,4 +199,80 @@ func (s *SoftmaxWithLoss) crossEntropyError(x mat.Matrix, t mat.Matrix) float64 
 		return -1 * v * math.Log(x.At(i, j)+delta)
 	}, t)
 	return mat.Sum(dense) / float64(bs)
+}
+
+// SmoothL1Loss : L1損失関数の素子
+type SmoothL1Loss struct {
+	out  mat.Matrix
+	t    mat.Matrix
+	loss float64
+}
+
+// NewSmoothL1Loss : L1損失関数の素子を取得
+func NewSmoothL1Loss() *SmoothL1Loss {
+	l1 := SmoothL1Loss{}
+	return &l1
+}
+
+func (l1 *SmoothL1Loss) Forward(x mat.Matrix, t mat.Matrix) (loss float64, accuracy float64) {
+	loss = l1.smoothL1Loss(x, t)
+	// TODO 精度の実装
+	accuracy = 0.0
+	return loss, accuracy
+}
+
+func smoothL1(x float64) float64 {
+	if math.Abs(x) < 1.0 {
+		return math.Pow(x, 2)/2
+	}
+	return math.Abs(x) - 0.5
+}
+
+func (l1 *SmoothL1Loss) smoothL1Loss(x mat.Matrix, t mat.Matrix) float64 {
+	xr, xc := x.Dims()
+	tr, tc := t.Dims()
+
+	// 実際のデータと正解データの行列の形が同じかを確認
+	if xr != tr || xc != tc {
+		// TODO エラー対応
+		return 0.0
+	}
+
+	// 入力値を保存（恒等関数＋誤差関数のため）
+	l1.out = mat.DenseCopyOf(x)
+
+	// バッチサイズを取得(行数)
+	bs := xr
+
+	// 各値のl1誤差を求め、バッチサイズを考慮して平均を出力
+	dense := mat.NewDense(xr, xc, nil)
+	dense.Apply(func(i, j int, v float64) float64 {
+		return smoothL1(v - x.At(i, j))
+	}, t)
+	return mat.Sum(dense) / float64(bs)
+}
+
+func (l1 *SmoothL1Loss) Backward() mat.Matrix {
+	r, c := l1.t.Dims()
+	dense := mat.NewDense(r, c, nil)
+	bs := r
+
+	dense.Apply(func(i, j int, v float64) float64 {
+		return smoothL1Gradient(v - l1.t.At(i, j)) / float64(bs)
+	}, l1.out)
+	return dense
+}
+
+func smoothL1Gradient(x float64) float64 {
+	// 1.0未満の場合は二乗誤差と同一
+	if math.Abs(x) < 1.0 {
+		return x
+	}
+
+	// 1.0以上の場合は正か負で分類
+	if x > 0 {
+		return 1
+	} else {
+		return -1
+	}
 }
