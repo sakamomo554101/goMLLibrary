@@ -1,11 +1,12 @@
 import model_loader
 import nnvm
+import tvm
 import os
 import json
 
 
 class TvmCompileParameter:
-    def __init__(self, model_root_path, model_type, output_folder, shape_dict, data_dict="float32", target="llvm", opt_level=3):
+    def __init__(self, model_root_path, model_type, output_folder, shape_dict, data_dict="float32", target="llvm", opt_level=3, ctx=tvm.cpu(0), debug=True):
         self.model_root_path = model_root_path
         self.model_type = model_type
         self.output_folder = output_folder
@@ -13,6 +14,8 @@ class TvmCompileParameter:
         self.opt_level = opt_level
         self.data_dict = data_dict
         self.shape_dict = shape_dict
+        self.ctx = ctx
+        self.debug = debug
 
 
 class TvmWrapper:
@@ -31,6 +34,7 @@ class TvmWrapper:
         )
         self.__model = loader.load()
 
+    # TODO : setup前に実行した場合に例外を発生させる
     def compile(self):
         # モデルからsymbol, parameterを取得
         # TODO : Darknetの対応が必要
@@ -51,6 +55,15 @@ class TvmWrapper:
             # TVM用のモデルデータをexport
             self.__export_model(graph, lib, params)
 
+            # グラフを作成
+            if self._ir_config.debug:
+                from tvm.contrib.debugger import debug_runtime as graph_runtime
+            else:
+                from tvm.contrib import graph_runtime
+            graph, params = graph_runtime.create(graph, lib, self.__param.ctx)
+            input_name = self.__model.graph.input[0].name
+            return graph, params, input_name
+
     def __export_model(self, graph, lib, params):
         # ライブラリをexport
         model_name = self.__param.model_type.value
@@ -68,6 +81,13 @@ class TvmWrapper:
         param_bytes = nnvm.compiler.save_param_dict(params)
         with open(os.path.join(self.__param.output_folder, param_name), "wb") as f:
             f.write(param_bytes)
+
+    # TODO : compile前に実行した場合に例外を発生させる
+    def execute(self, graph, params, input_name, x):
+        graph.set_input(input_name, tvm.nd.array(x.astype("float32")))
+        graph.set_input(params)
+        graph.run()
+        return graph.get_output(0)
 
 
 if __name__ == "__main__":

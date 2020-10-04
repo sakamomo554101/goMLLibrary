@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    working_directory: /home/development/go/src/github.com/goMLLibrary
+    docker:
+      - image: kurama554101/go-ml-library:0.2
+    steps:
+      - checkout # checkout goMLLibrary into working_directory
+      - run:
+          name: Execute Setup
+          command: |
+            bash install/setup_container.sh
+            source ~/.bash_profile
+            echo "end setup"
+      - run:
+          name: Execute Lint
+          command: |
+            source ~/.bash_profile
+            golangci-lint run core/*  -v --skip-dirs ./core/tvm_wrapper
